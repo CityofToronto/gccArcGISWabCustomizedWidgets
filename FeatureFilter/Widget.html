@@ -1,0 +1,77 @@
+<div>
+	<div id="appCode"></div>
+	<div class="btnContainer">
+		<p>Please make selection below then click Apply</p> 
+		<button id="btnApply">Apply</button>
+	</div>
+	<div id="tabs">
+		<ul>
+		    <li data-attr="category"><a href="#category">Programs</a></li>
+		    <li data-attr="conflict"><a href="#conflict">Coordination</a></li>
+		    <li data-attr="otherInfo"><a href="#otherInfo">Other Information</a></li>
+		</ul>
+		<div id="category">
+			<div id="loading" class="hidden"><div class="loader"></div></div>
+			<fieldset class="year-wrapper current-year">
+			    <legend><span class="whiteTriangle"></span>Construction Year</legend>
+			    <div>
+			    	<button id="toggleCurrentYears"><span>Select</span> All</button>
+					<br>
+				    <label for="currYear0"></label>
+				    <input type="checkbox" name="currYear0" id="currYear0" value="" class="year-selector">
+				    <label for="currYear1" class="short"></label>
+				    <input type="checkbox" name="currYear1" id="currYear1" value="" class="year-selector">
+				    <label for="currYear2" class="short"></label>
+				    <input type="checkbox" name="currYear2" id="currYear2" value="" class="year-selector">
+				    <label for="currYear3" class="short"></label>
+				    <input type="checkbox" name="currYear3" id="currYear3" value="" class="year-selector">
+				    <label for="currYear4" class="short"></label>
+				    <input type="checkbox" name="currYear4" id="currYear4" value="" class="year-selector">
+				    <label for="currYear5" class="short"></label>
+				    <input type="checkbox" name="currYear5" id="currYear5" value="" class="year-selector">
+				</div>
+			</fieldset>
+			<fieldset class="year-wrapper past-year">
+			    <legend><span class="whiteTriangle close"></span>Archived Construction Year</legend>
+			    <div class="hidden">
+				    <button id="togglePastYears"><span>Select</span> All</button>
+					<br>
+				    <label for="pastYear0"></label>
+				    <input type="checkbox" name="pastYear0" id="pastYear0" value="" class="year-selector">
+				    <label for="pastYear1" class="short"></label>
+				    <input type="checkbox" name="pastYear1" id="pastYear1" value="" class="year-selector">
+				    <label for="pastYear2" class="short"></label>
+				    <input type="checkbox" name="pastYear2" id="pastYear2" value="" class="year-selector">
+				    <label for="pastYear3" class="short"></label>
+				    <input type="checkbox" name="pastYear3" id="pastYear3" value="" class="year-selector">
+				    <label for="pastYear4" class="short"></label>
+				    <input type="checkbox" name="pastYear4" id="pastYear4" value="" class="year-selector">
+				    <label for="pastYear5" class="short"></label>
+				    <input type="checkbox" name="pastYear5" id="pastYear5" value="" class="year-selector">
+				    <label for="pastYear6" class="short"></label>
+				    <input type="checkbox" name="pastYear6" id="pastYear6" value="" class="year-selector">
+				</div>
+			</fieldset>
+			<fieldset class="category">
+				<legend>Programs</legend>
+				<button id="toggleAllPrograms"><span>Select</span> All</button>
+				<button id="toggleCategoryHeading"><span>Collapse</span> All</button>
+			</fieldset>
+		</div>
+		<div id="conflict">
+			<fieldset class="conflict">
+				<legend>Coordination</legend>
+				<button id="toggleAllConflict"><span>Select</span> All</button>
+				<button id="toggleConflictHeading"><span>Collapse</span> All</button>
+			</fieldset>
+		</div>
+		<div id="otherInfo">
+			<fieldset class="otherInfo">
+				<legend>Other Information</legend>
+				<button id="toggleAllOtherInfo"><span>Select</span> All</button>
+				<button id="toggleOtherInfoHeading"><span>Collapse</span> All</button>
+			</fieldset>
+		</div>
+	</div>
+	
+</div>
