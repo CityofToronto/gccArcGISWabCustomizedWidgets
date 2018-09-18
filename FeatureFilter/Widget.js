@@ -43,6 +43,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         for (var i = 0; i < 6; i++) {
           $('label[for="currYear' + i + '"]').text(currentYear+i);
           $('#currYear' + i).val(currentYear+i);
+          if (i > 0) {
+            $('label[for="conflictYear' + i + '"]').text(currentYear+i);
+            $('#conflictYear' + i).val(currentYear+i);
+          }
         }
         for (var i = 0; i < 7; i++) {
           $('label[for="pastYear' + i + '"]').text(currentYear-i-1);
@@ -154,7 +158,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
 
         // select/unselect all current/past year event
-        $('#toggleCurrentYears, #togglePastYears').click(function(){
+        $('#toggleCurrentYears, #togglePastYears, #toggleConflictProjectYears').click(function(){
           var text = $(this).children("span").text();
           if (text == 'Select') {
             text = "Unselect"; 
@@ -289,15 +293,22 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       // build category/program filter sql statement
       buildCategoryFilter: function() {
-        var yearFilter = [], categoryFilter = [], tt;
+        var yearFilter = [], statusFilter = [], categoryFilter = [], tt, program, sql;
         $.each($('.current-year input:checked'), function(index, item) {
           yearFilter.push("NOT (INV_START_YEAR>'" + item.value + "' OR INV_END_YEAR<'" + item.value + "')");
         });
         $.each($('.past-year input:checked'), function(index, item) {
           yearFilter.push("NOT (INV_START_YEAR>'" + item.value + "' OR INV_END_YEAR<'" + item.value + "')");
         });
+        $.each($('.project-status input:checked'), function(index, item) {
+          statusFilter.push("INV_STATUS = '" + item.value + "'");
+        });
         $.each($('.category input.layer-category:checked'), function(index, item){
-          categoryFilter.push("INV_DISPLAY_PROGRAM = '" + item.value + "'");
+          program = item.value;
+          sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
+          if (program.indexOf("TS_Moratorium") >= 0) sql = sql + " AND PRIORITY = 1";
+          if (program.indexOf("TS_Moratorium_2") >= 0) sql = sql + " AND PRIORITY = 2";
+          categoryFilter.push(sql);
         });
 
         for (var i = 0; i < yearFilter.length; i++) {
@@ -307,6 +318,13 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             yearStat += " OR (" + yearFilter[i] + ")";
         }
 
+        for (var k = 0; k < statusFilter.length; k++) {
+          if (k == 0) 
+            statusStat = statusFilter[k];
+          else
+            statusStat += " OR " + statusFilter[k];
+        }
+
         for (var j = 0; j < categoryFilter.length; j++) {
           if (j == 0) 
             categoryStat = categoryFilter[j];
@@ -314,8 +332,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             categoryStat += " OR " + categoryFilter[j];
         }
 
-        if (yearFilter.length > 0 && categoryFilter.length > 0) 
-          tt = "(" + yearStat + ") AND (" + categoryStat + ")";
+        if (yearFilter.length > 0 && categoryFilter.length > 0 && statusFilter.length > 0) 
+          tt = "(" + yearStat + ") AND (" + categoryStat + ") AND (" + statusStat + ")";
         else tt = "INV_DISPLAY_PROGRAM = ''";
         return tt;
       },
@@ -395,21 +413,22 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                           (graphic.attributes.INV_PUBLIC_CONTACT_EMAIL?"<br><a href='mailto:" + graphic.attributes.INV_PUBLIC_CONTACT_EMAIL + "'>" + graphic.attributes.INV_PUBLIC_CONTACT_EMAIL + "</a>":"") + 
                           (graphic.attributes.INV_PUBLIC_CONTACT_NAME?"</dd>":"") + 
                           (graphic.attributes.INV_WEB_SITE?"<dt>Website</dt><dd>" + "<a href='" + graphic.attributes.INV_WEB_SITE + "' target='_blank'>More information</a>" + "</dd>":"") + 
-        (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" + graphic.attributes.INV_PTPWU_PROJECT_CODE + "</dd><dt> </dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
-                       "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
-                      "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
-                      "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +
-                      "</form><a href=\"#\" onclick=\"document.getElementById(\'workunit\').submit()\">Basic Information</a></dd>" +
-                      "<dt> </dt><dd><form name='statusres' id='statusres' target='_blank' method='post' " + 
-                       "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaCoordination4GCC.jsp'>" +
-                      "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
-                      "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +  
-                      "</form><a href=\"#\" onclick=\"document.getElementById(\'statusres\').submit()\">Coordination Status and Resolution</a></dd>":"") +  
-        (graphic.attributes.INV_PTPDB_WORK_ID?"<dt>PTP Delivery Bundle</dt><dd>" + graphic.attributes.INV_PTPDB_PROJECT_CODE + "</dd><dt> </dt><dd>" +"<form name='delbundle' id='delbundle' target='_blank' method='post' " + 
-                       "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
-                      "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
-                      "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPDB_WORK_ID + "' />" + 
-                      "</form><a href=\"#\" onclick=\"document.getElementById(\'delbundle\').submit()\">Basic Information</a></dd>":"") +             
+                          (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
+                                         "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
+                                        "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
+                                        "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +
+                                        "</form><a href=\"#\" onclick=\"document.getElementById(\'workunit\').submit()\">" + graphic.attributes.INV_PTPWU_PROJECT_CODE + "</a></dd>" +
+                                        "<dt> </dt><dd><form name='statusres' id='statusres' target='_blank' method='post' " + 
+                                         "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaCoordination4GCC.jsp'>" +
+                                        "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
+                                        "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +  
+                                        "</form><a href=\"#\" onclick=\"document.getElementById(\'statusres\').submit()\">Coordination Status and Resolution</a></dd>":"") +  
+                          (graphic.attributes.INV_PTPDB_WORK_ID?"<dt>PTP Delivery Bundle</dt><dd>" +"<form name='delbundle' id='delbundle' target='_blank' method='post' " + 
+                                         "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
+                                        "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
+                                        "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPDB_WORK_ID + "' />" + 
+                                        "</form><a href=\"#\" onclick=\"document.getElementById(\'delbundle\').submit()\">"+ graphic.attributes.INV_PTPDB_PROJECT_CODE + "</a></dd>":"") +
+                          (graphic.attributes.WORK_ID?"<dt>IGE Work ID</dt><dd>" + graphic.attributes.WORK_ID + "</dd>":"") +               
                       "</dl>";
 
         return content;

@@ -52,6 +52,15 @@
 				    <input type="checkbox" name="pastYear6" id="pastYear6" value="" class="year-selector">
 				</div>
 			</fieldset>
+			<fieldset class="year-wrapper project-status">
+			    <legend><span class="whiteTriangle close"></span>Project Status</legend>
+			    <div class="hidden">
+				    <label for="proActive">Active</label>
+				    <input type="checkbox" name="proActive" id="proActive" value="Active" class="year-selector" checked>
+				    <label for="proCompleted">Completed</label>
+				    <input type="checkbox" name="proCompleted" id="proCompleted" value="Completed" class="year-selector">
+				<div>
+			</fieldset>
 			<fieldset class="category">
 				<legend>Programs</legend>
 				<button id="toggleAllPrograms"><span>Select</span> All</button>
@@ -59,6 +68,34 @@
 			</fieldset>
 		</div>
 		<div id="conflict">
+			<fieldset class="year-wrapper current-year">
+			    <legend><span class="whiteTriangle"></span>Project Year</legend>
+			    <div>
+			    	<button id="toggleConflictProjectYears"><span>Select</span> All</button>
+					<br>
+				    <label for="conflictYear1" class="short"></label>
+				    <input type="checkbox" name="conflictYear1" id="conflictYear1" value="" class="year-selector">
+				    <label for="conflictYear2" class="short"></label>
+				    <input type="checkbox" name="conflictYear2" id="conflictYear2" value="" class="year-selector">
+				    <label for="conflictYear3" class="short"></label>
+				    <input type="checkbox" name="conflictYear3" id="conflictYear3" value="" class="year-selector">
+				    <label for="conflictYear4" class="short"></label>
+				    <input type="checkbox" name="conflictYear4" id="conflictYear4" value="" class="year-selector">
+				    <label for="conflictYear5" class="short"></label>
+				    <input type="checkbox" name="conflictYear5" id="conflictYear5" value="" class="year-selector">
+				</div>
+			</fieldset>
+			<fieldset class="year-wrapper conflict-status">
+			    <legend><span class="whiteTriangle close"></span>Coordation Resolution</legend>
+			    <div class="hidden">
+				    <label for="conflictActive">Yes</label>
+				    <input type="checkbox" name="conflictActive" id="conflictActive" value="Yes" class="year-selector" checked>
+				    <label for="conflictNonactive">No</label>
+				    <input type="checkbox" name="conflictNonactive" id="conflictNonactive" value="No" class="year-selector">
+				    <label for="conflictPending">Null - Pending</label>
+				    <input type="checkbox" name="conflictPending" id="conflictPending" value="Null" class="year-selector">
+				<div>
+			</fieldset>
 			<fieldset class="conflict">
 				<legend>Coordination</legend>
 				<button id="toggleAllConflict"><span>Select</span> All</button>
