@@ -1,13 +1,16 @@
 define(['dojo/_base/declare', 'jimu/BaseWidget',
         'dojo/_base/lang',
         "dojo/promise/all",
+        "dojo/dom-construct",
+        "dijit/layout/ContentPane", 
+        "dijit/layout/TabContainer",
         'jimu/LayerInfos/LayerInfos',
         "esri/arcgis/utils",
         "esri/InfoTemplate",
         "esri/tasks/query",
         "esri/tasks/QueryTask",
         'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.js'],
-  function(declare, BaseWidget, lang, all, LayerInfos,  ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
+  function(declare, BaseWidget, lang, all, domConstruct, ContentPane, TabContainer, LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
     return declare([BaseWidget], {
 
       baseClass: 'jimu-widget-featureFilter',
@@ -105,7 +108,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
         var that = this;
         // group heading checkbox event
-        $('fieldset.category, fieldset.conflict, fieldset.otherInfo').on('change', '.layer-heading', function(){
+        $('fieldset.feature-group').on('change', '.layer-heading', function(){
           var childCategories = $(this).parent('.group-layer-heading').siblings('.layer-row, .group-layer-row');
           var groupHeadingLabel = childCategories.find('label');
           childCategories.find('input').prop('checked', this.checked);
@@ -136,7 +139,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
 
         // category checkbox event
-        $('fieldset.category, fieldset.conflict, fieldset.otherInfo').on('change', '.layer-category', function(){
+        $('fieldset.feature-group').on('change', '.layer-category', function(){
           var groupHeadings = $(this).parents('.group-layer-row');
           var checkedCategory, noOfAllCategories, groupHeadingLabel
           for (var i = 0; i < groupHeadings.length; i++) {
@@ -225,44 +228,79 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             that.buildLayer(activeTab);
           }
         });
+
+        // watch info window to initialize jquery ui tab
+        $popup = $(".esriPopup .contentPane");
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            var cssClass = $(".esriPopup").attr('class');
+            if (cssClass.indexOf("esriPopupVisible") >= 0 )
+            $(".infoTabs").tabs();
+          });    
+        });
+        observer.observe($popup[0], {childList: true});
+
+        /*$mobilePop = $(".esriMobileInfoView");
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            console.log(mutation);
+            console.log($(mutation.target));
+            if ($(mutation.target).attr('style') == "display: block;" )
+            $(mutation.target).find(".infoTabs").tabs();
+          });    
+        });
+        observer.observe($mobilePop[0], {attributes: true});
+        */
+        
+        $(".esriPopupMobile .titleButton.arrow, .esriMobileNavigationItem").on("click", function(e){
+           $(".infoTabs").tabs();
+           //e.stopPropagation();
+        })
+        
       },
 
       // build category groups
-      createLayerGroup: function(propertyType, toDomNode, groupInfo, level, legendUrl) {
-        var that = this, counter = 0, groupName, html;
+      createLayerGroup: function(tab, toDomNode, groupInfo, level, legendUrl) {
+        var that = this, counter = 0, groupName, html, groupHeadingValue;
         for (var grouplayer in groupInfo) {
           counter ++;
           groupName = grouplayer.replace(/[^a-zA-Z ]/g, "").split(' ').join('_');
+          if (groupInfo[grouplayer].layers) {
+            groupHeadingValue = grouplayer;
+          } else {
+            groupHeadingValue = groupInfo[grouplayer].id;
+          }
           html = "<div class='group-layer-row'>" + 
                         "<div class='group-layer-heading'>" + 
                           "<span class='headingIcon'></span>" + 
                           (groupInfo[grouplayer].legend?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
-                          "<label for='" + groupName  + "'>" + grouplayer + "</label><input type='checkbox' class='layer-heading' value='" + groupName + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
+                          "<label for='" + groupName  + "'>" + grouplayer + "</label><input type='checkbox' class='layer-heading' value='" + groupHeadingValue + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
                         "</div>" + 
                       "</div>";
           if (level == 0) {
-            $('fieldset.' + propertyType).append(html);
+            //$('fieldset.' + propertyType).append(html);
+            $('#' + tab + ' fieldset.feature-group').append(html);
           } else {
             toDomNode.append(html);
           }
          
           $.each(groupInfo[grouplayer].layers, function(index, layer) {
             if (layer.id) {
-              that.addLayerNode(propertyType, layer, counter-1, level, groupName, legendUrl);
+              that.addLayerNode(tab, layer, counter-1, level, groupName, legendUrl);
             } else {      
-              that.createLayerGroup(propertyType, $('#' + groupName).closest('.group-layer-row'), layer, level+1, legendUrl);
+              that.createLayerGroup(tab, $('#' + groupName).closest('.group-layer-row'), layer, level+1, legendUrl);
             }
           });
         };
       },
 
-      addLayerNode: function(propertyType, layerInfo, layerIndex, level, toDomNode, legendUrl) {
+      addLayerNode: function(tab, layerInfo, layerIndex, level, toDomNode, legendUrl) {
         var html = "<div class='layer-row'>" + 
                       (layerInfo.legend?"<span><img src='" + legendUrl + layerInfo.legend + "' alt='" + layerInfo.label + " legend' /></span>":"") +
                       "<label for='checkbox-" + layerInfo.id  + "'>" + layerInfo.label + "</label><input type='checkbox' class='layer-category' value='" + layerInfo.id + "' name='checkbox-" +  layerInfo.id + "' id='checkbox-" +  layerInfo.id + "'>" + 
                     "</div>";
         if (level == 0) {
-          $('fieldset.' + propertyType + ' > .group-layer-row:eq(' + layerIndex + ')').append(html);
+          $('#' + tab + ' fieldset > .group-layer-row:eq(' + layerIndex + ')').append(html);
         } else {
           $('#' + toDomNode).closest('.group-layer-row').append(html);
         }
@@ -292,6 +330,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       },
 
       // build category/program filter sql statement
+      // use input value to get selected category value
       buildCategoryFilter: function() {
         var yearFilter = [], statusFilter = [], categoryFilter = [], tt, program, sql;
         $.each($('.current-year input:checked'), function(index, item) {
@@ -340,7 +379,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       // build conflict/coordination filter sql statement
       buildConflictFilter: function() {
-        var conflictFilter = [], conflictStat = "COORD_STATUS = ''";
+        var yearFilter = [], statusFilter = [], conflictFilter = [], conflictStat = "COORD_STATUS = ''", tt;
+        $.each($('.conflict-year input:checked'), function(index, item) {
+          yearFilter.push("NOT (START_YEAR>'" + item.value + "' OR END_YEAR<'" + item.value + "')");
+        });
         $.each($('.conflict input.layer-category:checked'), function(index, item){
           if (index == 0) {
             conflictStat = "COORD_STATUS = '" + item.value + "'"
@@ -348,19 +390,32 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             conflictStat += " OR COORD_STATUS = '" + item.value + "'"
           }
         });
-        return conflictStat;
+
+        for (var i = 0; i < yearFilter.length; i++) {
+          if (i == 0) 
+            yearStat = "(" + yearFilter[i] + ")";
+          else
+            yearStat += " OR (" + yearFilter[i] + ")";
+        }
+
+        //
+        // TODO: resolution checks 
+        //
+
+        if (yearFilter.length > 0 && conflictStat.length > 0 /* && statusFilter.length > 0*/) 
+          tt = "(" + yearStat + ") AND (" + conflictStat + /*") AND (" + statusStat + */ ")";
+        return tt;
       },
 
       toggleOtherInfoLayerVisibility: function() {
-        var currLayer;
-        var labels = $("fieldset.otherInfo .group-layer-row").children('.group-layer-heading').siblings('.layer-row, .group-layer-row').find("label");
-        $.each(this.mapOtherLayerInfo, function(index, layer) {
-          $.each(labels, function(iindex, label) {
-            if ($.trim(layer.name) == $.trim(label.innerText))  {
-              layer.setVisibility($(label).siblings("input")[0].checked);
-            }  
-          });
-        });
+        var checkedInputs = $("#tabs fieldset.feature-group").eq($("#tabs").tabs("option", "active")).find("input");
+        $.map(this.mapOtherLayerInfo, function(layer, i) {
+          $.each(checkedInputs, function(index, checkbox){
+            if ($.trim(layer.name.toLowerCase()).indexOf($.trim(checkbox.value.toLowerCase())) >= 0) {
+              layer.setVisibility(checkbox.checked);
+            } 
+          })
+        })
       },
 
       setDefaultVisibleLayer: function(layers, layerInputs) {
@@ -397,7 +452,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           var date = month[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
         }
 
-       var content = "<dl>" +
+        var content = "<dl>" +
                           (graphic.attributes.INV_PROJECT?"<dt>Project</dt><dd>" + graphic.attributes.INV_PROJECT + "</dd>":"") + 
                           (graphic.attributes.INV_LOCATION?"<dt>Location</dt><dd>" + graphic.attributes.INV_LOCATION + "</dd>":"") + 
                           (graphic.attributes.INV_DETAIL?"<dt>Details</dt><dd>" + graphic.attributes.INV_DETAIL + "</dd>":"") + 
@@ -431,7 +486,31 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                           (graphic.attributes.WORK_ID?"<dt>IGE Work ID</dt><dd>" + graphic.attributes.WORK_ID + "</dd>":"") +               
                       "</dl>";
 
-        return content;
+        /*var tc = new TabContainer({style: "width:100%;height:100%;"}, domConstruct.create("div"));
+        var cp1 = new ContentPane({
+            title: "Project",
+            content: content
+        });
+
+        var cp2 = new ContentPane({
+            title: "Contract",
+            content: "test"
+        });
+        tc.addChild(cp1);
+        tc.addChild(cp2);
+        return tc.domNode;*/
+        
+        var tabs = '<div class="infoTabs">' + 
+                      '<ul>' + 
+                        '<li><a href="#infoWindowTabs-1">Project</a></li>' +
+                        '<li><a href="#infoWindowTabs-2">Contract</a></li>' + 
+                      '</ul>' +
+                      '<div id="infoWindowTabs-1">' + content + '</div>' + 
+                      '<div id="infoWindowTabs-2">Proin elit arcu, rutrum commodo, vehicula tempus, commodo a, risus. Curabitur nec arcu.</div>' + 
+                    '</div>';
+
+        return tabs;
+        
       },
 
       onOpen: function(){
