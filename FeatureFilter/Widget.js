@@ -1,16 +1,16 @@
 define(['dojo/_base/declare', 'jimu/BaseWidget',
         'dojo/_base/lang',
         "dojo/promise/all",
-        "dojo/dom-construct",
+        /*"dojo/dom-construct",
         "dijit/layout/ContentPane", 
-        "dijit/layout/TabContainer",
+        "dijit/layout/TabContainer",*/
         'jimu/LayerInfos/LayerInfos',
         "esri/arcgis/utils",
         "esri/InfoTemplate",
         "esri/tasks/query",
         "esri/tasks/QueryTask",
         'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.js'],
-  function(declare, BaseWidget, lang, all, domConstruct, ContentPane, TabContainer, LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
+  function(declare, BaseWidget, lang, all, /*domConstruct, ContentPane, TabContainer,*/ LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
     return declare([BaseWidget], {
 
       baseClass: 'jimu-widget-featureFilter',
@@ -24,6 +24,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         this._denyLayerInfosReorderResponseOneTime = false;
         var config = this.config;
         var legendUrl = this.config.legendUrl;
+        this.showApplyButton = config.showApplyButton;
+
+        if (!this.showApplyButton) {
+          $("div.btnContainer").addClass("hidden");
+        }
 
         this.createLayerGroup("category", $('.category')[0], config.groupLayers, 0, legendUrl);
         this.createLayerGroup("conflict", $('.conflict')[0], config.coordination, 0, legendUrl);
@@ -136,6 +141,24 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
               }
             }
           }
+
+          if (!that.showApplyButton) {
+            /*var childInputs;
+            if ($(this).parents(".group-layer-heading").siblings(".layer-row").length > 0) {
+              childInputs = $(this).parents(".group-layer-heading").siblings(".layer-row").find("input");
+            } else {
+              childInputs = $(this);
+            }
+              
+            $.each(childInputs, function(i, childInput) {
+              $.each(that.mapOtherLayerInfo, function(index, layer) {
+                if ($.trim(layer.name.toLowerCase()).indexOf($.trim(childInput.value.toLowerCase())) >= 0) {
+                  layer.setVisibility(childInput.checked);
+                } 
+              })  
+            })*/
+            $('#btnApply').click();
+          }
         });
 
         // category checkbox event
@@ -157,6 +180,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
               groupHeadingLabel.addClass('ui-checkboxradio-checked ui-state-active');
               groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked ui-icon-indeterminate').addClass('ui-icon-check ui-state-checked');
             }
+          }
+
+          if (!that.showApplyButton) {
+            /*var currInput = this;
+            $.each(that.mapOtherLayerInfo, function(index, layer) {
+              if ($.trim(layer.name.toLowerCase()).indexOf($.trim(currInput.value.toLowerCase())) >= 0) {
+                layer.setVisibility(currInput.checked);
+              } 
+            })*/
+            $('#btnApply').click();
           }
         });
 
@@ -432,16 +465,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $("label[for='" + visibleLayer[0].id + "']").addClass("ui-checkboxradio-checked ui-state-active");
           $("label[for='" + visibleLayer[0].id + "']").children('.ui-icon').addClass('ui-icon-check ui-state-checked');
         }
-      },
-
-      getFeatureIDs: function(query, mapLayerInfo) {
-        var promises = [], defered, queryTask;          
-        for (var i = 0; i < mapLayerInfo.length; i++) {             
-          queryTask = new QueryTask(mapLayerInfo[i].url);
-          defered = queryTask.executeForIds(query);
-          promises.push(defered.promise);
-        }
-        return promises;
       },
 
       // set info window content
