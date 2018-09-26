@@ -143,20 +143,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           }
 
           if (!that.showApplyButton) {
-            /*var childInputs;
-            if ($(this).parents(".group-layer-heading").siblings(".layer-row").length > 0) {
-              childInputs = $(this).parents(".group-layer-heading").siblings(".layer-row").find("input");
-            } else {
-              childInputs = $(this);
-            }
-              
-            $.each(childInputs, function(i, childInput) {
-              $.each(that.mapOtherLayerInfo, function(index, layer) {
-                if ($.trim(layer.name.toLowerCase()).indexOf($.trim(childInput.value.toLowerCase())) >= 0) {
-                  layer.setVisibility(childInput.checked);
-                } 
-              })  
-            })*/
             $('#btnApply').click();
           }
         });
@@ -183,12 +169,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           }
 
           if (!that.showApplyButton) {
-            /*var currInput = this;
-            $.each(that.mapOtherLayerInfo, function(index, layer) {
-              if ($.trim(layer.name.toLowerCase()).indexOf($.trim(currInput.value.toLowerCase())) >= 0) {
-                layer.setVisibility(currInput.checked);
-              } 
-            })*/
             $('#btnApply').click();
           }
         });
