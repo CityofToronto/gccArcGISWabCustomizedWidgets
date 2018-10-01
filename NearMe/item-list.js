@@ -155,6 +155,7 @@ define([
     _proximityIcon: null,//to hold selected theme color for proximity icon
     _gallerySwiper: null, //to hold instance of the gallery swiper dijit
     _mediaRefreshTimers: null, //to hold all media refresh interval timers
+    queryDef: null,
 
     postCreate: function () {
       this._filterIcon = null; //to store selected theme color for filter icon
@@ -584,6 +585,7 @@ define([
         }
         if(this._operationalLayers.length === 1){
           domStyle.set(this._panels.layerListPanel, 'display', 'none');
+          this._resetFilter(this._operationalLayers[0].layerIndex);
           this._onSingleLayerFound(null, this._operationalLayers[0]);
         }
     },
@@ -847,7 +849,7 @@ define([
     * @memberOf widgets/NearMe/item-list
     **/
     _showFilteredFeaturesOnLoad: function (features, layerID) {
-      var i, featureIds = '', maxFeatureLength, filter, opLayer;
+      var i, featureIds = '', maxFeatureLength, filter, opLayer, queryDef;
       opLayer = this._getFeatureLayerDetailsFormArray(layerID);
       if (this.config.selectedSearchLayerOnly) {
         //sort features according to distance.
@@ -863,7 +865,9 @@ define([
             }
             featureIds += features[i].attributes[this._selectedLayer.objectIdField];
           }
-          filter = this._selectedLayer.objectIdField + ' in (' + featureIds + ')';
+          queryDef = this._selectedLayer._defnExpr;
+          filter = "(" + this._selectedLayer.objectIdField + ' in (' + featureIds + ')' + ") AND (" + queryDef + ")";
+          //filter = this._selectedLayer.objectIdField + ' in (' + featureIds + ')';
           //set filter on map layer
           this._setFilterOnMapLayer(filter, opLayer.id, opLayer.url, opLayer.isMapServer);
         }
@@ -1163,6 +1167,7 @@ define([
     * @param{int} index
     * @memberOf widgets/NearMe/item-list
     **/
+    // Rui - apply queryDef to layers instead of "" when resetting - line 1178
     _resetFilter: function (layerIndex) {
       var layerIdOnMap, widgetFilter;
       if (this._operationalLayers[layerIndex].isMapServer) {
@@ -1174,7 +1179,7 @@ define([
       widgetFilter = this.filterManager.getWidgetFilter(layerIdOnMap, this.id);
       if (widgetFilter) {
         //reset widget filter on map layer by applying empty filter
-        this._setFilterOnMapLayer("", this._operationalLayers[layerIndex].id,
+        this._setFilterOnMapLayer(this.queryDef, this._operationalLayers[layerIndex].id,
           this._operationalLayers[layerIndex].url,
           this._operationalLayers[layerIndex].isMapServer);
         //once widget filter gets cleared, get updated filter on layer using layerInfos
@@ -1199,6 +1204,7 @@ define([
       } else {
         //set updated definition expression on the layer instances used by widget
         if (this._operationalLayers[layerIndex] && this.config.searchLayers[layerIndex]) {
+          this.queryDef = this.config.searchLayers[layerIndex].definitionExpression;
           this._operationalLayers[layerIndex].setDefinitionExpression(
             this.config.searchLayers[layerIndex].definitionExpression);
         }
