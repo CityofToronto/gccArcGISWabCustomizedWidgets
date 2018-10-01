@@ -49,8 +49,6 @@ fieldset.category > button { margin-bottom: 5px; }
 .group-layer-row > .group-layer-row { margin-left: 30px; }
 .group-layer-row > .group-layer-row .group-layer-heading span.legend { margin: 8px 8px 0 2px;}
 .ui-icon-indeterminate { background-position: -63px -128px; }
-#loading { position: absolute; z-index: 1; width: 100%; height: 100%; opacity: 0.8; background: #fff;}
-#loading div.loader { position: relative; top: 40%; left: 33%; border: 16px solid #f3f3f3; border-top: 16px solid #005fa2;  border-radius: 50%; width: 120px; height: 120px; animation: spin 2s linear infinite;}
 
 .btnContainer { font-size: 1.5em; color: #005fa2; font-weight: 700; text-align: center; }
 .btnContainer button { padding: 5px 25px; background-color: #005fa2; color: #fff; margin: 5px 0 10px;}
@@ -73,7 +71,7 @@ fieldset.category > button { margin-bottom: 5px; }
 .esriMobileInfoViewItem dd, .esriMobileInfoViewItem dt, .esriMobileInfoView .esriViewPopup tr { font-size: 12px; margin-bottom: 4px;}
 .esriPopupWrapper th, .esriMobileInfoView .esriViewPopup th { display: none; }
 .esriPopupWrapper tr td:first-child, .esriMobileInfoView .esriViewPopup tr td:first-child { font-weight: 700; vertical-align: top; width: 120px;} 
-#infoTabs div { padding: 8px 5px; }
+.infoTabs.ui-tabs div.ui-tabs-panel { padding: 8px 5px !important; }
 /*.esriPopupWrapper tr td:last-child { width: 60%; }*/
 
 /** general **/
