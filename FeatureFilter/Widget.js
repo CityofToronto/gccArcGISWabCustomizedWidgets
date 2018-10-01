@@ -1,16 +1,14 @@
 define(['dojo/_base/declare', 'jimu/BaseWidget',
         'dojo/_base/lang',
         "dojo/promise/all",
-        /*"dojo/dom-construct",
-        "dijit/layout/ContentPane", 
-        "dijit/layout/TabContainer",*/
+        'dojo/date/locale',
         'jimu/LayerInfos/LayerInfos',
         "esri/arcgis/utils",
         "esri/InfoTemplate",
         "esri/tasks/query",
         "esri/tasks/QueryTask",
         'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.js'],
-  function(declare, BaseWidget, lang, all, /*domConstruct, ContentPane, TabContainer,*/ LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
+  function(declare, BaseWidget, lang, all, locale, LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
     return declare([BaseWidget], {
 
       baseClass: 'jimu-widget-featureFilter',
@@ -265,10 +263,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         observer.observe($mobilePop[0], {attributes: true});
         */
         
-        $(".esriPopupMobile .titleButton.arrow, .esriMobileNavigationItem").on("click", function(e){
+        $(".esriPopupMobile .titleButton.arrow").click(function(e){
            $(".infoTabs").tabs();
-           //e.stopPropagation();
-        })
+        });
         
       },
 
@@ -358,8 +355,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         $.each($('.category input.layer-category:checked'), function(index, item){
           program = item.value;
           sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
-          if (program.indexOf("TS_Moratorium") >= 0) sql = sql + " AND PRIORITY = 1";
-          if (program.indexOf("TS_Moratorium_2") >= 0) sql = sql + " AND PRIORITY = 2";
+          if (program.indexOf("TS_Moratorium_1") >= 0) sql = sql.replace("TS_Moratorium_1", "TS_Moratorium") + " AND PRIORITY = 1";
+          if (program.indexOf("TS_Moratorium_2") >= 0) sql = sql.replace("TS_Moratorium_2", "TS_Moratorium") + " AND PRIORITY = 2";
           categoryFilter.push(sql);
         });
 
@@ -449,11 +446,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       // set info window content
       getTextContent:function(graphic) {
-        if (graphic.attributes.LAST_UPDATED_DATE) {
-          var d = new Date(graphic.attributes.LAST_UPDATED_DATE);
-          var month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          var date = month[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
-        }
 
         var content = "<dl>" +
                           (graphic.attributes.INV_PROJECT?"<dt>Project</dt><dd>" + graphic.attributes.INV_PROJECT + "</dd>":"") + 
@@ -462,7 +454,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                           (graphic.attributes.INV_DURATION_COORD?"<dt>Duration</dt><dd>" + graphic.attributes.INV_DURATION_COORD + "</dd>":"") + 
                           (graphic.attributes.SCOPE?"<dt>Scope</dt><dd>" + graphic.attributes.SCOPE + "</dd>":"") + 
                           (graphic.attributes.INV_STATUS?"<dt>Status</dt><dd>" + graphic.attributes.INV_STATUS + "</dd>":"") + 
-                          (date?"<dt>Last Updated</dt><dd>" + date + "</dd>":"") + 
+                          (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
                           (graphic.attributes.INV_PRIORITY?"<dt>Priority</dt><dd>" + graphic.attributes.INV_PRIORITY + "</dd>":"") +
                           (graphic.attributes.PROJ_NUM?"<dt>Project #</dt><dd>" + graphic.attributes.PROJ_NUM + "</dd>":"") + 
                           (graphic.attributes.INV_OWNER?"<dt>Owner</dt><dd>" + graphic.attributes.INV_OWNER + "</dd>":"") + 
@@ -489,19 +481,17 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                           (graphic.attributes.WORK_ID?"<dt>IGE Work ID</dt><dd>" + graphic.attributes.WORK_ID + "</dd>":"") +               
                       "</dl>";
 
-        /*var tc = new TabContainer({style: "width:100%;height:100%;"}, domConstruct.create("div"));
-        var cp1 = new ContentPane({
-            title: "Project",
-            content: content
-        });
-
-        var cp2 = new ContentPane({
-            title: "Contract",
-            content: "test"
-        });
-        tc.addChild(cp1);
-        tc.addChild(cp2);
-        return tc.domNode;*/
+        var contract = "<dl>" +
+                          (graphic.attributes.CONTR_STATE?"<dt>Contract state</dt><dd>" + graphic.attributes.CONTR_STATE + "</dd>":"") + 
+                          (graphic.attributes.CONTR_NUMBER?"<dt>Contract #</dt><dd>" + graphic.attributes.CONTR_NUMBER + "</dd>":"") + 
+                          (graphic.attributes.CONTR_AWARD_DATE?"<dt>Award date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_AWARD_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE?"<dt>Substantial performance date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE?"<dt>Tender/RFP issue date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
+                          (graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE?"<dt>Tender/RFP closing date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE?"<dt>Warranty expiry date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
+                          (graphic.attributes.DESIGN_START_DATE?"<dt>Design start date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_START_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.DESIGN_COMPLETION_DATE?"<dt>Design end date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_COMPLETION_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                        "</dl>";
         
         var tabs = '<div class="infoTabs">' + 
                       '<ul>' + 
@@ -509,11 +499,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                         '<li><a href="#infoWindowTabs-2">Contract</a></li>' + 
                       '</ul>' +
                       '<div id="infoWindowTabs-1">' + content + '</div>' + 
-                      '<div id="infoWindowTabs-2">Proin elit arcu, rutrum commodo, vehicula tempus, commodo a, risus. Curabitur nec arcu.</div>' + 
+                      '<div id="infoWindowTabs-2">' + contract + '</div>' + 
                     '</div>';
 
-        return tabs;
-        
+        return tabs; 
       },
 
       onOpen: function(){
