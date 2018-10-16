@@ -1,12 +1,12 @@
 define(['dojo/_base/declare', 'jimu/BaseWidget',
         'dojo/_base/lang',
-        "dojo/promise/all",
+        'dojo/promise/all',
         'dojo/date/locale',
         'jimu/LayerInfos/LayerInfos',
-        "esri/arcgis/utils",
-        "esri/InfoTemplate",
-        "esri/tasks/query",
-        "esri/tasks/QueryTask",
+        'esri/arcgis/utils',
+        'esri/InfoTemplate',
+        'esri/tasks/query',
+        'esri/tasks/QueryTask',
         'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.js'],
   function(declare, BaseWidget, lang, all, locale, LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
     return declare([BaseWidget], {
@@ -95,9 +95,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           // disable / enable select all program buttons
           this.map.on("extent-change", function(ext){
             if ($("#map").attr("data-zoom") >= 5) {
-              $("#toggleAllPrograms, #toggleAllConflict, #toggleAllOtherInfo").button("option", "disabled", false);
+              $(".btnSelectAll").button("option", "disabled", false);
             } else {
-              $("#toggleAllPrograms, #toggleAllConflict, #toggleAllOtherInfo").button("option", "disabled", true);
+              $(".btnSelectAll").button("option", "disabled", true);
             }
           });
         }
@@ -187,7 +187,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
 
         // toggle all program accordion
-        $('#toggleCategoryHeading, #toggleConflictHeading, #toggleOtherInfoHeading').click(function(){
+        $('.btnToggleAll').click(function(){
           var text = $(this).children('span').text();
           var heading = $(this).closest('fieldset').find('.group-layer-row');
           if (text == 'Expand') {
@@ -205,7 +205,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
 
         // select / unselect all programs
-        $('#toggleAllPrograms, #toggleAllConflict, #toggleAllOtherInfo').click(function(){
+        $('.btnSelectAll').click(function(){
           var text = $(this).children("span").text();
           var childCategories = $(this).parent('fieldset').find('input');
           var groupHeadingLabel = $(this).parent('fieldset').find('label');
@@ -344,10 +344,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       buildCategoryFilter: function() {
         var yearFilter = [], statusFilter = [], categoryFilter = [], tt, program, sql;
         $.each($('.current-year input:checked'), function(index, item) {
-          yearFilter.push("NOT (INV_START_YEAR>'" + item.value + "' OR INV_END_YEAR<'" + item.value + "')");
+          yearFilter.push("NOT (INV_START_YEAR>" + item.value + " OR INV_END_YEAR<" + item.value + ")");
         });
         $.each($('.past-year input:checked'), function(index, item) {
-          yearFilter.push("NOT (INV_START_YEAR>'" + item.value + "' OR INV_END_YEAR<'" + item.value + "')");
+          yearFilter.push("NOT (INV_START_YEAR>" + item.value + " OR INV_END_YEAR<" + item.value + ")");
         });
         $.each($('.project-status input:checked'), function(index, item) {
           statusFilter.push("INV_STATUS = '" + item.value + "'");
@@ -355,8 +355,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         $.each($('.category input.layer-category:checked'), function(index, item){
           program = item.value;
           sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
-          if (program.indexOf("TS_Moratorium_1") >= 0) sql = sql.replace("TS_Moratorium_1", "TS_Moratorium") + " AND PRIORITY = 1";
-          if (program.indexOf("TS_Moratorium_2") >= 0) sql = sql.replace("TS_Moratorium_2", "TS_Moratorium") + " AND PRIORITY = 2";
+          if (program.indexOf("TS_Moratorium_1") >= 0) sql = sql.replace("TS_Moratorium_1", "TS_Moratorium") + " AND PRIORITY = 1"; // existing
+          if (program.indexOf("TS_Moratorium_2") >= 0) sql = sql.replace("TS_Moratorium_2", "TS_Moratorium") + " AND PRIORITY = 2"; // future
           categoryFilter.push(sql);
         });
 
@@ -391,7 +391,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       buildConflictFilter: function() {
         var yearFilter = [], statusFilter = [], conflictFilter = [], conflictStat = "COORD_STATUS = ''", tt;
         $.each($('.conflict-year input:checked'), function(index, item) {
-          yearFilter.push("NOT (START_YEAR>'" + item.value + "' OR END_YEAR<'" + item.value + "')");
+          yearFilter.push("NOT (START_YEAR>" + item.value + " OR END_YEAR<" + item.value + ")");
         });
         $.each($('.conflict input.layer-category:checked'), function(index, item){
           if (index == 0) {
@@ -482,15 +482,15 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                       "</dl>";
 
         var contract = "<dl>" +
-                          (graphic.attributes.CONTR_STATE?"<dt>Contract state</dt><dd>" + graphic.attributes.CONTR_STATE + "</dd>":"") + 
+                          (graphic.attributes.CONTR_STATE?"<dt>Contract State</dt><dd>" + graphic.attributes.CONTR_STATE + "</dd>":"") + 
                           (graphic.attributes.CONTR_NUMBER?"<dt>Contract #</dt><dd>" + graphic.attributes.CONTR_NUMBER + "</dd>":"") + 
-                          (graphic.attributes.CONTR_AWARD_DATE?"<dt>Award date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_AWARD_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE?"<dt>Substantial performance date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE?"<dt>Tender/RFP issue date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
-                          (graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE?"<dt>Tender/RFP closing date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE?"<dt>Warranty expiry date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
-                          (graphic.attributes.DESIGN_START_DATE?"<dt>Design start date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_START_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.DESIGN_COMPLETION_DATE?"<dt>Design end date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_COMPLETION_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_AWARD_DATE?"<dt>Award Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_AWARD_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE?"<dt>Substantial Performance Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE?"<dt>Tender/RFP Issue Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
+                          (graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE?"<dt>Tender/RFP Closing Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE?"<dt>Warranty Expiry Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
+                          (graphic.attributes.DESIGN_START_DATE?"<dt>Design Start Date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_START_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          (graphic.attributes.DESIGN_COMPLETION_DATE?"<dt>Design End Date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_COMPLETION_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
                         "</dl>";
         
         var tabs = '<div class="infoTabs">' + 
@@ -511,16 +511,14 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         panel.setPosition(panel.position);
         panel.panelManager.normalizePanel(panel);
         if ($("#map").attr("data-zoom") < 5) {
-          $("#toggleAllPrograms, #toggleAllConflict, #toggleAllOtherInfo").button("option", "disabled", true);
+          $(".btnSelectAll").button("option", "disabled", true);
         } else {
-          $("#toggleAllPrograms, #toggleAllConflict, #toggleAllOtherInfo").button("option", "disabled", false);
+          $(".btnSelectAll").button("option", "disabled", false);
         }
-        if ($('#toggleCategoryHeading').children("span").text().indexOf("Collapse") >= 0) {
-          $('#toggleCategoryHeading').click();
+        if ($('.btnToggleAll').children("span").text().indexOf("Collapse") >= 0) {
+          $('.btnToggleAll').click();
         }
-        if ($('#toggleOtherInfoHeading').children("span").text().indexOf("Collapse") >= 0) {
-          $('#toggleOtherInfoHeading').click();
-        }
+        
         this.buildLayer("category");
       }
     });
