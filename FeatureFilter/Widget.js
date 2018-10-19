@@ -475,7 +475,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                           (graphic.attributes.INV_PROJECT?"<dt>Project</dt><dd>" + graphic.attributes.INV_PROJECT + "</dd>":"") + 
                           (graphic.attributes.INV_LOCATION?"<dt>Location</dt><dd>" + graphic.attributes.INV_LOCATION + "</dd>":"") + 
                           (graphic.attributes.INV_DETAIL?"<dt>Details</dt><dd>" + graphic.attributes.INV_DETAIL + "</dd>":"") + 
-                          (graphic.attributes.INV_DURATION_COORD?"<dt>Duration</dt><dd>" + graphic.attributes.INV_DURATION_COORD + "</dd>":"") + 
+                          (graphic.attributes.INV_DURATION_COORD?"<dt>Planing Duration</dt><dd>" + graphic.attributes.INV_DURATION_COORD + "</dd>":"") +
+                          (graphic.attributes.INV_DURATION_DELIVERY?"<dt>Delivery Duration</dt><dd>" + graphic.attributes.INV_DURATION_DELIVERY + "</dd>":"") + 
                           (graphic.attributes.SCOPE?"<dt>Scope</dt><dd>" + graphic.attributes.SCOPE + "</dd>":"") + 
                           (graphic.attributes.INV_STATUS?"<dt>Status</dt><dd>" + graphic.attributes.INV_STATUS + "</dd>":"") + 
                           (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
