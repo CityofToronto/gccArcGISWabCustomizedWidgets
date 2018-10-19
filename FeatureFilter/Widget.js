@@ -7,7 +7,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         'esri/InfoTemplate',
         'esri/tasks/query',
         'esri/tasks/QueryTask',
-        'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.js'],
+        'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.min.js'],
   function(declare, BaseWidget, lang, all, locale, LayerInfos, ArcgisUtils, InfoTemplate, Query, QueryTask, $) {
     return declare([BaseWidget], {
 
@@ -59,7 +59,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $('#pastYear' + i).val(currentYear-i-1);
         }
 
-        var strCode = '<link rel="stylesheet" href="./widgets/FeatureFilter/css/jquery-ui.css">'; 
+        var strCode = '<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">'; 
         $("#appCode").html(strCode);
 
         // put related layers to array
@@ -337,6 +337,30 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
               mapLayerInfo[i].setVisibility(false);
             }
         }
+
+        // calculate total linear length by program
+        /*
+        on.once(mapLayerInfo[1], "update-end", function() {
+          console.log(mapLayerInfo[1].graphics.length);
+          var lengthByProgram = [], length, program;
+          if (mapLayerInfo[1].graphics.length > 0) {               
+            for (var i = 0; i < mapLayerInfo[1].graphics.length; i++) {
+              length = geometryEngine.planarLength(mapLayerInfo[1].graphics[i].geometry, "kilometers");
+              program = mapLayerInfo[1].graphics[i].attributes.INV_DISPLAY_PROGRAM;
+              for (var j = 0; j < lengthByProgram.length; j++) {
+                if (lengthByProgram[j].program == program) {
+                  lengthByProgram[j].totalLength += length; 
+                  j = lengthByProgram.length + 1;
+                }
+              }
+              if (j == lengthByProgram.length) {
+                  lengthByProgram[j] = {"program": program, "totalLength": length};
+              }
+            }
+            console.log(lengthByProgram);
+          }
+        })*/
+        
       },
 
       // build category/program filter sql statement
