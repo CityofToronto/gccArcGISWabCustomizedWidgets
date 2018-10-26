@@ -238,6 +238,13 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           } else { 
             that.buildLayer(activeTab);
           }
+
+          // publish selected years in Program tab for distance calculation
+          var selectedYears = [];
+          $('.current-year input.year-selector:checked, .past-year input.year-selector:checked').each(function() {
+             selectedYears.push({"year": this.value}); 
+          });
+          that.publishData(selectedYears);
         });
 
         // watch info window to initialize jquery ui tab
@@ -379,8 +386,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         $.each($('.category input.layer-category:checked'), function(index, item){
           program = item.value;
           sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
-          if (program.indexOf("TS_Moratorium_1") >= 0) sql = sql.replace("TS_Moratorium_1", "TS_Moratorium") + " AND PRIORITY = 1"; // existing
-          if (program.indexOf("TS_Moratorium_2") >= 0) sql = sql.replace("TS_Moratorium_2", "TS_Moratorium") + " AND PRIORITY = 2"; // future
           categoryFilter.push(sql);
         });
 
