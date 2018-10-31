@@ -76,6 +76,8 @@ fieldset.category > button { margin-bottom: 5px; }
 .esriPopupWrapper th, .esriMobileInfoView .esriViewPopup th { display: none; }
 .esriPopupWrapper tr td:first-child, .esriMobileInfoView .esriViewPopup tr td:first-child { font-weight: 700; vertical-align: top; width: 120px;} 
 .infoTabs.ui-tabs div.ui-tabs-panel { padding: 8px 5px !important; }
+#infoWindowTabs-2 dt { flex: 0 0 55%; }
+#infoWindowTabs-2 dd { flex: 0 0 40%; }
 /*.esriPopupWrapper tr td:last-child { width: 60%; }*/
 
 /** general **/

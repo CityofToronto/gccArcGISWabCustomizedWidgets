@@ -16,6 +16,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       mapProgramLayerInfo: [],
       mapCoordinationLayerInfo: [],
       mapOtherLayerInfo: [],
+      categoryQuery: '',
 
       startup: function() {
         this.inherited(arguments);
@@ -244,7 +245,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $('.current-year input.year-selector:checked, .past-year input.year-selector:checked').each(function() {
              selectedYears.push({"year": this.value}); 
           });
-          that.publishData(selectedYears);
+          that.publishData([selectedYears, that.categoryQuery]);
+          //that.publishData(selectedYears);
         });
 
         // watch info window to initialize jquery ui tab
@@ -413,6 +415,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         if (yearFilter.length > 0 && categoryFilter.length > 0 && statusFilter.length > 0) 
           tt = "(" + yearStat + ") AND (" + categoryStat + ") AND (" + statusStat + ")";
         else tt = "INV_DISPLAY_PROGRAM = ''";
+        this.categoryQuery = tt;
         return tt;
       },
 
@@ -512,15 +515,15 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                       "</dl>";
 
         var contract = "<dl>" +
-                          (graphic.attributes.CONTR_STATE?"<dt>Contract State</dt><dd>" + graphic.attributes.CONTR_STATE + "</dd>":"") + 
-                          (graphic.attributes.CONTR_NUMBER?"<dt>Contract #</dt><dd>" + graphic.attributes.CONTR_NUMBER + "</dd>":"") + 
-                          (graphic.attributes.CONTR_AWARD_DATE?"<dt>Award Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_AWARD_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE?"<dt>Substantial Performance Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE?"<dt>Tender/RFP Issue Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
-                          (graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE?"<dt>Tender/RFP Closing Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE?"<dt>Warranty Expiry Date</dt><dd>" + locale.format(new Date(graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
-                          (graphic.attributes.DESIGN_START_DATE?"<dt>Design Start Date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_START_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
-                          (graphic.attributes.DESIGN_COMPLETION_DATE?"<dt>Design End Date</dt><dd>" + locale.format(new Date(graphic.attributes.DESIGN_COMPLETION_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'})  + "</dd>":"") + 
+                          "<dt>Contract State</dt><dd>" + (graphic.attributes.CONTR_STATE?graphic.attributes.CONTR_STATE:"") + "</dd>" + 
+                          "<dt>Contract #</dt><dd>" + (graphic.attributes.CONTR_NUMBER?graphic.attributes.CONTR_NUMBER:"") + "</dd>" + 
+                          "<dt>Award Date</dt><dd>" + (graphic.attributes.CONTR_AWARD_DATE?locale.format(new Date(graphic.attributes.CONTR_AWARD_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"")  + "</dd>" + 
+                          "<dt>Substantial Performance Date</dt><dd>" + (graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE?locale.format(new Date(graphic.attributes.CONTR_SUBSTAN_PERFORM_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"")  + "</dd>" + 
+                          "<dt>Tender/RFP Issue Date</dt><dd>" + (graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE?locale.format(new Date(graphic.attributes.CONTR_TEND_ADVERT_RFP_ISS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"") + "</dd>" + 
+                          "<dt>Tender/RFP Closing Date</dt><dd>" + (graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE?locale.format(new Date(graphic.attributes.CONTR_TEND_CLOS_RFP_CLOS_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"")  + "</dd>" + 
+                          "<dt>Warranty Expiry Date</dt><dd>" + (graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE?locale.format(new Date(graphic.attributes.CONTR_WARRANTY_EXPIRY_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"") + "</dd>" + 
+                          "<dt>Design Start Date</dt><dd>" + (graphic.attributes.DESIGN_START_DATE?locale.format(new Date(graphic.attributes.DESIGN_START_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"")  + "</dd>" + 
+                          "<dt>Design End Date</dt><dd>" + (graphic.attributes.DESIGN_COMPLETION_DATE?locale.format(new Date(graphic.attributes.DESIGN_COMPLETION_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}):"")  + "</dd>" + 
                         "</dl>";
         
         var tabs = '<div class="infoTabs">' + 
