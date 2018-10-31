@@ -1,9 +1,11 @@
 define(['dojo/_base/declare', 
         'jimu/BaseWidget',
         'esri/arcgis/utils',
+        'esri/tasks/query', 
+        'esri/tasks/QueryTask',
         'esri/geometry/geometryEngine',
         'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.min.js'],
-function(declare, BaseWidget, ArcgisUtils, GeometryEngine, $) {
+function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) {
   return declare(BaseWidget, {
 
     name: 'Distance Calculator',
@@ -11,6 +13,7 @@ function(declare, BaseWidget, ArcgisUtils, GeometryEngine, $) {
     mapCoordinationLayerInfo: [],
     mapOtherLayerInfo: [],
     lengthByYear: [],
+    categoryQuery: '',
 
     startup: function(){
       this.fetchDataByName('Feature Filter');
@@ -37,37 +40,27 @@ function(declare, BaseWidget, ArcgisUtils, GeometryEngine, $) {
 
       var that = this;
       $("#btnCalculate").click(function(){
+        $("#loader").removeClass("hidden");
+        $("#totalDistanceContent").addClass("hidden");
+        var queryTask = new QueryTask(that.mapProgramLayerInfo[1].url);
+
+        var query = new Query();
+        query.returnGeometry = true;
+        query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
+        query.where = categoryQuery;
+        query.outFields = ['*'];
+        queryTask.execute(query, that.calculateTotalDistance);
+        
+        /*
         if (that.mapProgramLayerInfo[1].graphics.length > 0) {
           that.calculateTotalDistance (that.mapProgramLayerInfo[1].graphics);
         }
+        */
       })
     },
 
-    onOpen: function(){
-        var panel = this.getPanel();
-        panel.position.width = 500;
-        panel.setPosition(panel.position);
-        panel.panelManager.normalizePanel(panel);
-    },
-
-    onReceiveData: function(name, widgetId, data, historyData) {
-      if (name != "Feature Filter") {
-        console.log ("Error when receiving widget data");
-        return;
-      } else {
-        lengthByYear = data;  
-      } 
-    },
-
-    compare: function(a,b) {
-      if (a.attributes.INV_OWNER < b.attributes.INV_OWNER)  
-        return -1;
-      if (a.last_nom > b.last_nom)
-        return 1;
-      return 0;
-    },
-
-    calculateTotalDistance: function(features) {
+    calculateTotalDistance: function(resultData) {
+      var features = resultData.features;
       var lengthByProgram, length, program, owner, startYear, endYear, featuresByYear = [];
       for (var m = 0; m < lengthByYear.length; m++) { 
         lengthByYear[m].totalLengthByYear = 0;
@@ -86,9 +79,7 @@ function(declare, BaseWidget, ArcgisUtils, GeometryEngine, $) {
               //featuresByYear[j].sort((a,b) => (a.attributes.INV_OWNER === b.attributes.INV_OWNER) ? (a.attributes.INV_PROJECT > b.attributes.INV_PROJECT ? 1 : ((b.attributes.INV_PROJECT > a.attributes.INV_PROJECT) ? -1 : 0)) : 1);
             }
         }
-        //console.log(i + " === " + length + " === " + startYear + " === " + endYear + " === " + features[i].attributes.INV_PROJECT + " === " + features[i].attributes.INV_OWNER + " === " + features[i].attributes.FROM_STREE);
       }
-      //console.log(featuresByYear);
       for (var m = 0; m < featuresByYear.length; m++) {
         lengthByProgram = [];
 
@@ -112,32 +103,34 @@ function(declare, BaseWidget, ArcgisUtils, GeometryEngine, $) {
       var template = $('#distanceSum').html();
       var html = Mustache.to_html(template, {"result": lengthByYear});
       $('#totalDistanceContent').html(html);
-      /*
-              for (var j = 0; j < lengthByProgram.length; j++) {
-                if (lengthByProgram[j].program == program && lengthByProgram[j].owner == owner) {
-                  lengthByProgram[j].totalLength += length; 
-                  j = lengthByProgram.length + 1;
-                }
-              }
-              if (j == lengthByProgram.length) {
-                  lengthByProgram[j] = {"owner": owner, "program": program, "totalLength": length};
-                  details.push({"owner": owner, "program": program, "totalLength": length});
-              }
-              lengthByYear[y].details = details;
-              
-              if (lengthByYear[y].details) {
-                lengthByYear[y].details.push(lengthByProgram[j]);
-              } else {
-                lengthByYear[y].details = lengthByProgram[j];
-              }
-              
-            } // check year
+      
+      $("#loader").addClass("hidden");
+      $("#totalDistanceContent").removeClass("hidden");
+    },
 
-        } // end of checking years 
-      } // end of looping features
-      */
-      //console.log(lengthByYear);
-        
+     onOpen: function(){
+        var panel = this.getPanel();
+        panel.position.width = 500;
+        panel.setPosition(panel.position);
+        panel.panelManager.normalizePanel(panel);
+    },
+
+    onReceiveData: function(name, widgetId, data, historyData) {
+      if (name != "Feature Filter") {
+        console.log ("Error when receiving widget data");
+        return;
+      } else {
+        lengthByYear = data[0];
+        categoryQuery = data[1];  
+      } 
+    },
+
+    compare: function(a,b) {
+      if (a.attributes.INV_OWNER < b.attributes.INV_OWNER)  
+        return -1;
+      if (a.last_nom > b.last_nom)
+        return 1;
+      return 0;
     }
 
   })
