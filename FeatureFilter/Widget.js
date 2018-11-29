@@ -16,7 +16,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       mapProgramLayerInfo: [],
       mapCoordinationLayerInfo: [],
       mapOtherLayerInfo: [],
-      categoryQuery: '',
+      categoryQuery: '', // parameter to pass to calculate distance
+      //conflictOwner: {},
 
       startup: function() {
         this.inherited(arguments);
@@ -25,13 +26,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         var legendUrl = this.config.legendUrl;
         this.showApplyButton = config.showApplyButton;
 
+        //this.conflictOwner = this.getConflictOwner();
+
         if (!this.showApplyButton) {
           $("div.btnContainer").addClass("hidden");
         }
 
-        this.createLayerGroup("category", $('.category')[0], config.groupLayers, 0, legendUrl);
+        this.createLayerGroup("category", $('.category')[0], config.program, 0, legendUrl);
+        //this.createLayerGroup("restriction", $('.restriction')[0], config.restriction, 0, legendUrl);
         this.createLayerGroup("conflict", $('.conflict')[0], config.coordination, 0, legendUrl);
-        this.createLayerGroup("otherInfo", $('.otherInfo')[0], config.otherLayers, 0, legendUrl);
+        this.createLayerGroup("otherInfo", $('.otherInfo')[0], config.other, 0, legendUrl);
 
         // jquery ui element initialization
         $( "#tabs" ).tabs();
@@ -44,6 +48,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           icon: false
         });
         $("fieldset button, #btnApply").button();
+
+        $( "#dialog" ).dialog({
+          autoOpen: false,
+          modal: true,
+          buttons: {
+            OK: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
 
         var d = new Date();
         var currentYear = d.getFullYear();
@@ -67,15 +81,20 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         if (this.map.itemId) {
           var myLayers = ArcgisUtils.getLayerList(this.map);
 
-          var infoTemplate = new InfoTemplate();
-          infoTemplate.setTitle("${INV_OWNER}");
-          infoTemplate.setContent(this.getTextContent);
+          var progInfoTemplate = new InfoTemplate();
+          progInfoTemplate.setTitle("${INV_OWNER}");
+          progInfoTemplate.setContent(this.getTextContent);
+
+          var coordInfoTemplate = new InfoTemplate();
+          coordInfoTemplate.setTitle("${INV_PROJECT}");
+          coordInfoTemplate.setContent(this.getCoordContent);          
 
           for (var i = 0; i < myLayers.length; i++) {
             if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf("program") >= 0) {
-              myLayers[i].layer.infoTemplate = infoTemplate;
+              myLayers[i].layer.infoTemplate = progInfoTemplate;
               this.mapProgramLayerInfo.push(myLayers[i].layer);
             } else if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf("coordination") >= 0) {
+              myLayers[i].layer.infoTemplate = coordInfoTemplate;
               this.mapCoordinationLayerInfo.push(myLayers[i].layer);
             } else {
               this.mapOtherLayerInfo.push(myLayers[i].layer);
@@ -237,6 +256,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           if (activeTab == "otherInfo") {
             that.toggleOtherInfoLayerVisibility();
           } else { 
+            if (activeTab == "conflict") {
+              if ($('.coordination input.layer-category:checked').length == 0) {
+                $( "#dialog" ).dialog( "open" );
+              }
+            }
             that.buildLayer(activeTab);
           }
 
@@ -289,7 +313,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           } else {
             groupHeadingValue = groupInfo[grouplayer].id;
           }
-          html = "<div class='group-layer-row'>" + 
+          html = "<div class='group-layer-row" + (groupInfo[grouplayer].class?" " + groupInfo[grouplayer].class:"") + "'>" + 
                         "<div class='group-layer-heading'>" + 
                           "<span class='headingIcon'></span>" + 
                           (groupInfo[grouplayer].legend?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
@@ -328,7 +352,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       // show features according to filters
       buildLayer: function(propertyType) {
         var layerDef = "", mapLayerInfo;
-        if (propertyType == 'category') {
+        if (propertyType == 'category' /*|| propertyType == 'restriction'*/) {
           //this.controlAllProgramInputs(true);
           layerDef = this.buildCategoryFilter();
           mapLayerInfo = this.mapProgramLayerInfo;
@@ -391,6 +415,13 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           categoryFilter.push(sql);
         });
 
+        /*
+        $.each($('.restriction input.layer-category:checked'), function(index, item){
+          program = item.value;
+          sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
+          categoryFilter.push(sql);
+        });*/
+
         for (var i = 0; i < yearFilter.length; i++) {
           if (i == 0) 
             yearStat = "(" + yearFilter[i] + ")";
@@ -412,25 +443,39 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             categoryStat += " OR " + categoryFilter[j];
         }
 
-        if (yearFilter.length > 0 && categoryFilter.length > 0 && statusFilter.length > 0) 
+        if (yearFilter.length > 0 && categoryFilter.length > 0 && statusFilter.length > 0) {
           tt = "(" + yearStat + ") AND (" + categoryStat + ") AND (" + statusStat + ")";
-        else tt = "INV_DISPLAY_PROGRAM = ''";
-        this.categoryQuery = tt;
+          this.categoryQuery = "(" + categoryStat + ") AND (" + statusStat + ")"; // only pass category and status, not years
+        } else { 
+          tt = "INV_DISPLAY_PROGRAM = ''";
+          this.categoryQuery = tt;
+        }
         return tt;
       },
 
       // build conflict/coordination filter sql statement
       buildConflictFilter: function() {
-        var yearFilter = [], statusFilter = [], conflictFilter = [], conflictStat = "COORD_STATUS = ''", tt;
+        var yearFilter = [], statusFilter = [], conflictFilter = [], conflictStat = "COORD_STATUS = ''", bizOwner= "", tt;
         $.each($('.conflict-year input:checked'), function(index, item) {
           yearFilter.push("NOT (START_YEAR>" + item.value + " OR END_YEAR<" + item.value + ")");
         });
-        $.each($('.conflict input.layer-category:checked'), function(index, item){
+        $.each($('.coordination input.layer-category:checked'), function(index, item){
           if (index == 0) {
             conflictStat = "COORD_STATUS = '" + item.value + "'"
           } else {
             conflictStat += " OR COORD_STATUS = '" + item.value + "'"
           }
+        });
+        $.each($('.coordBizOwner input.layer-category:checked'), function(index, item){
+          if (index == 0) {
+            bizOwner = "INV_OWNER = '" + item.value + "'"
+          } else {
+            bizOwner += " OR INV_OWNER = '" + item.value + "'"
+          }
+        });
+        $.each($('.conflict-status input:checked'), function(index, item) {
+          if (item.length > 0) statusFilter.push("IS_RESOLVED = '" + item.value + "'");
+          else statusFilter.push("IS_RESOLVED is null");
         });
 
         for (var i = 0; i < yearFilter.length; i++) {
@@ -439,13 +484,19 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           else
             yearStat += " OR (" + yearFilter[i] + ")";
         }
+        for (var k = 0; k < statusFilter.length; k++) {
+          if (k == 0) 
+            statusStat = statusFilter[k];
+          else
+            statusStat += " OR " + statusFilter[k];
+        }
 
         //
         // TODO: resolution checks 
         //
 
-        if (yearFilter.length > 0 && conflictStat.length > 0 /* && statusFilter.length > 0*/) 
-          tt = "(" + yearStat + ") AND (" + conflictStat + /*") AND (" + statusStat + */ ")";
+        if (yearFilter.length > 0 && conflictStat.length > 0  && statusFilter.length > 0) 
+          tt = "(" + yearStat + ") AND (" + conflictStat + ") AND (" + statusStat + ")" + (bizOwner.length>0?" AND (" + bizOwner + ")":"");
         return tt;
       },
 
@@ -483,29 +534,30 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                           (graphic.attributes.INV_PROJECT?"<dt>Project</dt><dd>" + graphic.attributes.INV_PROJECT + "</dd>":"") + 
                           (graphic.attributes.INV_LOCATION?"<dt>Location</dt><dd>" + graphic.attributes.INV_LOCATION + "</dd>":"") + 
                           (graphic.attributes.INV_DETAIL?"<dt>Details</dt><dd>" + graphic.attributes.INV_DETAIL + "</dd>":"") + 
-                          (graphic.attributes.INV_DURATION_COORD?"<dt>Planing Duration</dt><dd>" + graphic.attributes.INV_DURATION_COORD + "</dd>":"") +
-                          (graphic.attributes.INV_DURATION_DELIVERY?"<dt>Delivery Duration</dt><dd>" + graphic.attributes.INV_DURATION_DELIVERY + "</dd>":"") + 
+                          (graphic.attributes.INV_DURATION_COORD?"<dt>Planning Duration</dt><dd>" + graphic.attributes.INV_DURATION_COORD + "</dd>":"") +
+                          "<dt>Delivery Duration</dt><dd>" + (graphic.attributes.INV_DURATION_DELIVERY?graphic.attributes.INV_DURATION_DELIVERY:"") + "</dd>" + 
                           (graphic.attributes.SCOPE?"<dt>Scope</dt><dd>" + graphic.attributes.SCOPE + "</dd>":"") + 
                           (graphic.attributes.INV_STATUS?"<dt>Status</dt><dd>" + graphic.attributes.INV_STATUS + "</dd>":"") + 
                           (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
                           (graphic.attributes.INV_PRIORITY?"<dt>Priority</dt><dd>" + graphic.attributes.INV_PRIORITY + "</dd>":"") +
                           (graphic.attributes.PROJ_NUM?"<dt>Project #</dt><dd>" + graphic.attributes.PROJ_NUM + "</dd>":"") + 
                           (graphic.attributes.INV_OWNER?"<dt>Owner</dt><dd>" + graphic.attributes.INV_OWNER + "</dd>":"") + 
-                          (graphic.attributes.INV_PUBLIC_CONTACT_NAME?"<dt>Contact</dt><dd>" + graphic.attributes.INV_PUBLIC_CONTACT_NAME:"") + 
-                          (graphic.attributes.INV_PUBLIC_CONTACT_PHONE?"<br><a href='tel:" + graphic.attributes.INV_PUBLIC_CONTACT_PHONE + "'>" + graphic.attributes.INV_PUBLIC_CONTACT_PHONE + "</a>":"") + 
-                          (graphic.attributes.INV_PUBLIC_CONTACT_EMAIL?"<br><a href='mailto:" + graphic.attributes.INV_PUBLIC_CONTACT_EMAIL + "'>" + graphic.attributes.INV_PUBLIC_CONTACT_EMAIL + "</a>":"") + 
-                          (graphic.attributes.INV_PUBLIC_CONTACT_NAME?"</dd>":"") + 
+                          (graphic.attributes.INV_INTERNAL_CONTACT_NAME?"<dt>Contact</dt><dd>" + graphic.attributes.INV_INTERNAL_CONTACT_NAME:"") + 
+                          (graphic.attributes.INV_INTERNAL_CONTACT_PHONE?"<br><a href='tel:" + graphic.attributes.INV_INTERNAL_CONTACT_PHONE + "'>" + graphic.attributes.INV_INTERNAL_CONTACT_PHONE + "</a>":"") + 
+                          (graphic.attributes.INV_INTERNAL_CONTACT_EMAIL?"<br><a href='mailto:" + graphic.attributes.INV_INTERNAL_CONTACT_EMAIL + "'>" + graphic.attributes.INV_INTERNAL_CONTACT_EMAIL + "</a>":"") + 
+                          (graphic.attributes.INV_INTERNAL_CONTACT_NAME?"</dd>":"") + 
                           (graphic.attributes.INV_WEB_SITE?"<dt>Website</dt><dd>" + "<a href='" + graphic.attributes.INV_WEB_SITE + "' target='_blank'>More information</a>" + "</dd>":"") + 
                           (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
                                          "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
                                         "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
                                         "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +
                                         "</form><a href=\"#\" onclick=\"document.getElementById(\'workunit\').submit()\">" + graphic.attributes.INV_PTPWU_PROJECT_CODE + "</a></dd>" +
-                                        "<dt> </dt><dd><form name='statusres' id='statusres' target='_blank' method='post' " + 
+                                        "<dt>Coordination</dt><dd><form name='statusres' id='statusres' target='_blank' method='post' " + 
                                          "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaCoordination4GCC.jsp'>" +
                                         "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
                                         "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +  
-                                        "</form><a href=\"#\" onclick=\"document.getElementById(\'statusres\').submit()\">Coordination Status and Resolution</a></dd>":"") +  
+                                        "</form><a href=\"#\" onclick=\"document.getElementById(\'statusres\').submit()\">Link to Status and Resolution</a></dd>":"") +  
+                          "<dt></dt><dd></dd>" +
                           (graphic.attributes.INV_PTPDB_WORK_ID?"<dt>PTP Delivery Bundle</dt><dd>" +"<form name='delbundle' id='delbundle' target='_blank' method='post' " + 
                                          "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
                                         "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
@@ -537,6 +589,47 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
         return tabs; 
       },
+
+      getCoordContent:function(graphic) {
+
+        var content = "<dl>" + 
+            "<dt>Coordination Status</dt><dd>" + (graphic.attributes.COORD_STATUS?graphic.attributes.COORD_STATUS:"") + "</dd>" + 
+            "<dt>Start Year</dt><dd>" + (graphic.attributes.START_YEAR?graphic.attributes.START_YEAR:"") + "</dd>" +
+            "<dt>End Year</dt><dd>" + (graphic.attributes.END_YEAR?graphic.attributes.END_YEAR:"") + "</dd>" +
+            (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
+            "<dt>Resolution Status</dt><dd>" + (graphic.attributes.IS_RESOLVED?graphic.attributes.IS_RESOLVED:"") + "</dd>" + 
+            "<dt>Plannned Work</dt><dd>" + (graphic.attributes.PLANNED_WORK?graphic.attributes.PLANNED_WORK:"") + "</dd>" + 
+            "<dt>Related Planned Work</dt><dd>" + (graphic.attributes.REL_PLANNED_WORK?graphic.attributes.REL_PLANNED_WORK:"") + "</dd>" + 
+            (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
+                          "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
+                          "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
+                          "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +
+                          "</form><a href=\"#\" onclick=\"document.getElementById(\'workunit\').submit()\">" + graphic.attributes.INV_PTPWU_PROJECT_CODE + "</a></dd>" +
+                          "<dt>Coordination</dt><dd><form name='statusres' id='statusres' target='_blank' method='post' " + 
+                           "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaCoordination4GCC.jsp'>" +
+                          "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
+                          "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +  
+                          "</form><a href=\"#\" onclick=\"document.getElementById(\'statusres\').submit()\">Link to Status and Resolution</a></dd>":"") +  
+            "<dt></dt><dd></dd>" +
+            (graphic.attributes.INV_PTPDB_WORK_ID?"<dt>PTP Delivery Bundle</dt><dd>" +"<form name='delbundle' id='delbundle' target='_blank' method='post' " + 
+                           "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
+                          "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
+                          "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPDB_WORK_ID + "' />" + 
+                          "</form><a href=\"#\" onclick=\"document.getElementById(\'delbundle\').submit()\">"+ graphic.attributes.INV_PTPDB_PROJECT_CODE + "</a></dd>":"") +
+          "</dl>";
+        return content;
+      },
+
+      /*getConflictOwner:function() {
+        var layers = this.config.coordination["Business Owner"].layers, owners;
+        $.each(layers, function(index, value) {
+          if (value.id) {
+            owners.push(value.id);
+          } else {
+
+          }
+        })
+      },*/
 
       onOpen: function(){
         var panel = this.getPanel();

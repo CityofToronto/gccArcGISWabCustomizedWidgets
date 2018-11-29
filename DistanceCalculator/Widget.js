@@ -14,6 +14,7 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
     mapOtherLayerInfo: [],
     lengthByYear: [],
     categoryQuery: '',
+    distanceByYear: [],
 
     startup: function(){
       this.fetchDataByName('Feature Filter');
@@ -42,15 +43,18 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
       $("#btnCalculate").click(function(){
         $("#loader").removeClass("hidden");
         $("#totalDistanceContent").addClass("hidden");
-        var queryTask = new QueryTask(that.mapProgramLayerInfo[1].url);
-
-        var query = new Query();
-        query.returnGeometry = true;
-        query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
-        query.where = categoryQuery;
-        query.outFields = ['*'];
-        queryTask.execute(query, that.calculateTotalDistance);
-        
+        distanceByYear = [];
+        Promise.all(that.queryDistance()).then(function(data){
+          var template = $('#distanceSum').html();
+          var html = Mustache.to_html(template, {"result": distanceByYear});
+          $('#totalDistanceContent').html(html);
+          $("#loader").addClass("hidden");
+          $("#totalDistanceContent").removeClass("hidden");
+        });
+      
+        //, that.calculateTotalDistance);
+        //promises = all([parcels, buildings]);
+        //promises.then(that.calculateTotalDistance);
         /*
         if (that.mapProgramLayerInfo[1].graphics.length > 0) {
           that.calculateTotalDistance (that.mapProgramLayerInfo[1].graphics);
@@ -59,7 +63,46 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
       })
     },
 
-    calculateTotalDistance: function(resultData) {
+    queryDistance: function() {
+      promises = [];
+      var queryTask = new QueryTask(this.mapProgramLayerInfo[1].url);
+
+      var statDef = new esri.tasks.StatisticDefinition();
+      statDef.statisticType = "sum";
+      statDef.onStatisticField = "P_LENGTH";
+      statDef.outStatisticFieldName = "length";
+      
+      var query = new Query();
+      query.returnGeometry = true;
+      query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_CONTAINS;
+      query.outStatistics = [ statDef ];
+      query.groupByFieldsForStatistics = ["INV_OWNER", "INV_PROJECT"];
+      query.orderByFields = ["INV_OWNER", "INV_PROJECT"];
+
+      for (var i = 0; i < lengthByYear.length; i++) {
+        query.where = categoryQuery + " AND (NOT (INV_START_YEAR>" + lengthByYear[i].year + " OR INV_END_YEAR<" + lengthByYear[i].year + "))";
+        var defered = queryTask.execute(query, this.calculateTotalDistanceByYear(lengthByYear[i].year));
+        promises.push(defered.promise);
+      }
+      return promises;
+    },
+
+    calculateTotalDistanceByYear: function (year) {
+        return function (resultData) {
+          var distance = resultData.features.filter(i => i.attributes.LENGTH > 0);
+          var totalDistance = distance.reduce((a, b) => +a + +b.attributes.LENGTH, 0);
+          distanceByYear.push({"details": distance, "year": year, "totalLengthByYear": totalDistance});
+        }
+    },
+
+    /*  
+    calculateTotalDistanceByYear: function(resultData, year) {
+      console.log(year);
+      var details = [];
+      details.push(resultData.features.filter(i => i.attributes.LENGTH > 0));
+
+      console.log(details);
+
       var features = resultData.features;
       var lengthByProgram, length, program, owner, startYear, endYear, featuresByYear = [];
       for (var m = 0; m < lengthByYear.length; m++) { 
@@ -86,7 +129,9 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         for (var k = 0; k < featuresByYear[m].length; k++) {
           program = featuresByYear[m][k].attributes.INV_PROJECT;
           owner = featuresByYear[m][k].attributes.INV_OWNER;
+          //length = featuresByYear[m][k].attributes.P_LENGTH;
           length = GeometryEngine.planarLength(featuresByYear[m][k].geometry, "kilometers");
+          //console.log(length + " vs " + length_c);
           for (var n = 0; n < lengthByProgram.length; n++) {
             if (lengthByProgram[n].program == program && lengthByProgram[n].owner == owner) {
               lengthByProgram[n].totalLength = Math.round((length + lengthByProgram[n].totalLength)*100)/100; 
@@ -100,13 +145,16 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         lengthByYear[m].details = lengthByProgram;
       }
       //console.log(resultData);
-      var template = $('#distanceSum').html();
-      var html = Mustache.to_html(template, {"result": lengthByYear});
-      $('#totalDistanceContent').html(html);
+      if (details.length == lengthByYear.length) {
+        var template = $('#distanceSum').html();
+        var html = Mustache.to_html(template, {"result": {"details": details}});
+        $('#totalDistanceContent').html(html);
+        
+        $("#loader").addClass("hidden");
+        $("#totalDistanceContent").removeClass("hidden");
+      }
       
-      $("#loader").addClass("hidden");
-      $("#totalDistanceContent").removeClass("hidden");
-    },
+    }, */
 
      onOpen: function(){
         var panel = this.getPanel();
@@ -121,7 +169,7 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         return;
       } else {
         lengthByYear = data[0];
-        categoryQuery = data[1];  
+        categoryQuery = data[1]; 
       } 
     },
 

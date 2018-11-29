@@ -58,6 +58,8 @@ fieldset.category > button { margin-bottom: 5px; }
 .btnContainer button { padding: 5px 25px; background-color: #005fa2; color: #fff; margin: 5px 0 10px;}
 #btnApply:active { background: #0288d1 !important; border: 1px solid #01579b !important;}
 
+#conflict fieldset p { margin: 15px 10px; font-size: 1.1em;}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

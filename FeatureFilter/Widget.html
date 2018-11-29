@@ -7,6 +7,7 @@
 	<div id="tabs">
 		<ul>
 		    <li data-attr="category"><a href="#category">Programs</a></li>
+		    <!--<li data-attr="restriction"><a href="#restriction">Construction Restriction</a></li>		    -->
 		    <li data-attr="conflict"><a href="#conflict">Coordination</a></li>
 		    <li data-attr="otherInfo"><a href="#otherInfo">Other Information</a></li>
 		</ul>
@@ -67,6 +68,13 @@
 				<button class="btnToggleAll"><span>Collapse</span> All</button>
 			</fieldset>
 		</div>
+		<!--<div id="restriction">
+			<fieldset class="restriction feature-group">
+				<legend>Construction Restriction</legend>
+				<button class="btnSelectAll"><span>Select</span> All</button>
+				<button class="btnToggleAll"><span>Collapse</span> All</button>
+			</fieldset>
+		</div>-->
 		<div id="conflict">
 			<fieldset class="year-wrapper conflict-year">
 			    <legend><span class="whiteTriangle"></span>Project Year</legend>
@@ -74,7 +82,7 @@
 			    	<button id="toggleConflictProjectYears"><span>Select</span> All</button>
 					<br>
 				    <label for="conflictYear1" class="short"></label>
-				    <input type="checkbox" name="conflictYear1" id="conflictYear1" value="" class="year-selector">
+				    <input type="checkbox" name="conflictYear1" id="conflictYear1" value="" class="year-selector" checked>
 				    <label for="conflictYear2" class="short"></label>
 				    <input type="checkbox" name="conflictYear2" id="conflictYear2" value="" class="year-selector">
 				    <label for="conflictYear3" class="short"></label>
@@ -89,15 +97,16 @@
 			    <legend><span class="whiteTriangle close"></span>Coordation Resolution</legend>
 			    <div class="hidden">
 				    <label for="conflictActive">Yes</label>
-				    <input type="checkbox" name="conflictActive" id="conflictActive" value="Yes" class="year-selector" checked>
+				    <input type="checkbox" name="conflictActive" id="conflictActive" value="yes" class="year-selector">
 				    <label for="conflictNonactive">No</label>
-				    <input type="checkbox" name="conflictNonactive" id="conflictNonactive" value="No" class="year-selector">
-				    <label for="conflictPending">Null - Pending</label>
-				    <input type="checkbox" name="conflictPending" id="conflictPending" value="Null" class="year-selector">
+				    <input type="checkbox" name="conflictNonactive" id="conflictNonactive" value="no" class="year-selector">
+				    <label for="conflictPending">Pending</label>
+				    <input type="checkbox" name="conflictPending" id="conflictPending" value="" class="year-selector" checked>
 				<div>
 			</fieldset>
 			<fieldset class="conflict feature-group">
 				<legend>Coordination</legend>
+				<p>Please select <b>Coordination Status</b> first, and then select <b>Business Owner</b>. </p>
 				<button class="btnSelectAll"><span>Select</span> All</button>
 				<button class="btnToggleAll"><span>Collapse</span> All</button>
 			</fieldset>
@@ -109,5 +118,8 @@
 				<button class="btnToggleAll"><span>Collapse</span> All</button>
 			</fieldset>
 		</div>
+	</div>
+	<div id="dialog" title="Missing selection">
+	  <p>Please select <b>Coordination Status</b> first to view coordination results.</p> 
 	</div>
 </div>
