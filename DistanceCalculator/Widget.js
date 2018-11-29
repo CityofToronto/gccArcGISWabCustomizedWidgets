@@ -52,14 +52,6 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
           $("#totalDistanceContent").removeClass("hidden");
         });
       
-        //, that.calculateTotalDistance);
-        //promises = all([parcels, buildings]);
-        //promises.then(that.calculateTotalDistance);
-        /*
-        if (that.mapProgramLayerInfo[1].graphics.length > 0) {
-          that.calculateTotalDistance (that.mapProgramLayerInfo[1].graphics);
-        }
-        */
       })
     },
 
@@ -94,67 +86,6 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
           distanceByYear.push({"details": distance, "year": year, "totalLengthByYear": totalDistance});
         }
     },
-
-    /*  
-    calculateTotalDistanceByYear: function(resultData, year) {
-      console.log(year);
-      var details = [];
-      details.push(resultData.features.filter(i => i.attributes.LENGTH > 0));
-
-      console.log(details);
-
-      var features = resultData.features;
-      var lengthByProgram, length, program, owner, startYear, endYear, featuresByYear = [];
-      for (var m = 0; m < lengthByYear.length; m++) { 
-        lengthByYear[m].totalLengthByYear = 0;
-        lengthByYear[m].details = [];
-        featuresByYear[m] = [];
-      }
-      for (var i = 0; i < features.length; i++) {
-        length = GeometryEngine.planarLength(features[i].geometry, "kilometers");
-        startYear = features[i].attributes.INV_START_YEAR;
-        endYear = features[i].attributes.INV_END_YEAR;
-        for (var j = 0; j < lengthByYear.length; j++) {         
-            if (startYear <= lengthByYear[j].year  && lengthByYear[j].year <= endYear) {     
-              lengthByYear[j].totalLengthByYear = Math.round((length + lengthByYear[j].totalLengthByYear)*100)/100;
-              featuresByYear[j].push(features[i]);
-              featuresByYear[j].sort((a,b) => (a.attributes.INV_OWNER > b.attributes.INV_OWNER) ? 1 : ((b.attributes.INV_OWNER > a.attributes.INV_OWNER) ? -1 : 0));
-              //featuresByYear[j].sort((a,b) => (a.attributes.INV_OWNER === b.attributes.INV_OWNER) ? (a.attributes.INV_PROJECT > b.attributes.INV_PROJECT ? 1 : ((b.attributes.INV_PROJECT > a.attributes.INV_PROJECT) ? -1 : 0)) : 1);
-            }
-        }
-      }
-      for (var m = 0; m < featuresByYear.length; m++) {
-        lengthByProgram = [];
-
-        for (var k = 0; k < featuresByYear[m].length; k++) {
-          program = featuresByYear[m][k].attributes.INV_PROJECT;
-          owner = featuresByYear[m][k].attributes.INV_OWNER;
-          //length = featuresByYear[m][k].attributes.P_LENGTH;
-          length = GeometryEngine.planarLength(featuresByYear[m][k].geometry, "kilometers");
-          //console.log(length + " vs " + length_c);
-          for (var n = 0; n < lengthByProgram.length; n++) {
-            if (lengthByProgram[n].program == program && lengthByProgram[n].owner == owner) {
-              lengthByProgram[n].totalLength = Math.round((length + lengthByProgram[n].totalLength)*100)/100; 
-              n = lengthByProgram.length + 1;
-            }
-          }
-          if (n == lengthByProgram.length) {
-              lengthByProgram[n] = {"owner": owner, "program": program, "totalLength": Math.round(length*100)/100};
-          }
-        }
-        lengthByYear[m].details = lengthByProgram;
-      }
-      //console.log(resultData);
-      if (details.length == lengthByYear.length) {
-        var template = $('#distanceSum').html();
-        var html = Mustache.to_html(template, {"result": {"details": details}});
-        $('#totalDistanceContent').html(html);
-        
-        $("#loader").addClass("hidden");
-        $("#totalDistanceContent").removeClass("hidden");
-      }
-      
-    }, */
 
      onOpen: function(){
         var panel = this.getPanel();

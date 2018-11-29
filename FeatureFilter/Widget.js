@@ -17,7 +17,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       mapCoordinationLayerInfo: [],
       mapOtherLayerInfo: [],
       categoryQuery: '', // parameter to pass to calculate distance
-      //conflictOwner: {},
 
       startup: function() {
         this.inherited(arguments);
@@ -25,8 +24,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         var config = this.config;
         var legendUrl = this.config.legendUrl;
         this.showApplyButton = config.showApplyButton;
-
-        //this.conflictOwner = this.getConflictOwner();
 
         if (!this.showApplyButton) {
           $("div.btnContainer").addClass("hidden");
@@ -270,7 +267,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
              selectedYears.push({"year": this.value}); 
           });
           that.publishData([selectedYears, that.categoryQuery]);
-          //that.publishData(selectedYears);
         });
 
         // watch info window to initialize jquery ui tab
@@ -353,7 +349,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       buildLayer: function(propertyType) {
         var layerDef = "", mapLayerInfo;
         if (propertyType == 'category' /*|| propertyType == 'restriction'*/) {
-          //this.controlAllProgramInputs(true);
           layerDef = this.buildCategoryFilter();
           mapLayerInfo = this.mapProgramLayerInfo;
         }
@@ -370,29 +365,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
               mapLayerInfo[i].setVisibility(false);
             }
         }
-
-        // calculate total linear length by program
-        /*
-        on.once(mapLayerInfo[1], "update-end", function() {
-          console.log(mapLayerInfo[1].graphics.length);
-          var lengthByProgram = [], length, program;
-          if (mapLayerInfo[1].graphics.length > 0) {               
-            for (var i = 0; i < mapLayerInfo[1].graphics.length; i++) {
-              length = geometryEngine.planarLength(mapLayerInfo[1].graphics[i].geometry, "kilometers");
-              program = mapLayerInfo[1].graphics[i].attributes.INV_DISPLAY_PROGRAM;
-              for (var j = 0; j < lengthByProgram.length; j++) {
-                if (lengthByProgram[j].program == program) {
-                  lengthByProgram[j].totalLength += length; 
-                  j = lengthByProgram.length + 1;
-                }
-              }
-              if (j == lengthByProgram.length) {
-                  lengthByProgram[j] = {"program": program, "totalLength": length};
-              }
-            }
-            console.log(lengthByProgram);
-          }
-        })*/
         
       },
 
@@ -414,13 +386,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
           categoryFilter.push(sql);
         });
-
-        /*
-        $.each($('.restriction input.layer-category:checked'), function(index, item){
-          program = item.value;
-          sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
-          categoryFilter.push(sql);
-        });*/
 
         for (var i = 0; i < yearFilter.length; i++) {
           if (i == 0) 
@@ -619,17 +584,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           "</dl>";
         return content;
       },
-
-      /*getConflictOwner:function() {
-        var layers = this.config.coordination["Business Owner"].layers, owners;
-        $.each(layers, function(index, value) {
-          if (value.id) {
-            owners.push(value.id);
-          } else {
-
-          }
-        })
-      },*/
 
       onOpen: function(){
         var panel = this.getPanel();
