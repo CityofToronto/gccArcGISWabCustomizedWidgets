@@ -83,7 +83,8 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         return function (resultData) {
           var distance = resultData.features.filter(i => i.attributes.LENGTH > 0);
           var totalDistance = distance.reduce((a, b) => +a + +b.attributes.LENGTH, 0);
-          distanceByYear.push({"details": distance, "year": year, "totalLengthByYear": totalDistance});
+          distance.filter(i => i.attributes.LENGTH = i.attributes.LENGTH.toLocaleString());
+          distanceByYear.push({"details": distance, "year": year, "totalLengthByYear": totalDistance.toLocaleString()});
         }
     },
 
@@ -102,14 +103,6 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         lengthByYear = data[0];
         categoryQuery = data[1]; 
       } 
-    },
-
-    compare: function(a,b) {
-      if (a.attributes.INV_OWNER < b.attributes.INV_OWNER)  
-        return -1;
-      if (a.last_nom > b.last_nom)
-        return 1;
-      return 0;
     }
 
   })
