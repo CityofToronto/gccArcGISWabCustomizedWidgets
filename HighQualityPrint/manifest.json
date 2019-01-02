@@ -1,0 +1,17 @@
+{
+  "name": "HighQualityPrint",
+  "platform": "HTML",
+  "version": "2.5",
+  "wabVersion": "2.5",
+  "author": "Rui Yang Li",
+  "description": "Print high quality map using given REST service",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasConfig": false,
+    "hasLocale": false,
+    "hasStyle": true,
+    "hasUIFile": true,
+    "hasSettingPage": false
+  }
+}

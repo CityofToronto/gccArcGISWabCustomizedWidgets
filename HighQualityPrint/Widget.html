@@ -1,0 +1,91 @@
+<div>
+	<div id="appCode"></div>
+	<fieldset class="highQualityPrint">
+		<div>
+		    <label for="mapTitle">Map Title</label>
+		    <input type="text" name="#mapTitle" id="mapTitle" value="T.O. INview"/>
+		</div>
+		<div>
+		    <label for="template">Layout</label>
+		    <select name="template" id="template">
+		      <option value="TOINview_A3 Landscape">A3 Landscape</option>
+		      <option value="TOINview_A3 Portrait">A3 Portrait</option>
+		      <option value="TOINview_A4 Landscape" selected="">A4 Landscape</option>
+		      <option value="TOINview_A4 Portrait">A4 Portrait</option>
+		      <option value="TOINview_Letter ANSI A Landscape">Letter ANSI A Landscape</option>
+		      <option value="TOINview_Letter ANSI A Portrait">Letter ANSI A Portrait</option>
+		      <!--<option value="MAP_ONLY">MAP_ONLY</option> -->
+		    </select>
+	    </div>
+
+	    <div>
+		    <label for="format">Format</label>
+		    <select name="format" id="format">
+		      <option value="pdf" selected="">PDF</option>
+		      <option value="png">PNG</option>
+		      <option value="svg">SVG</option>
+		    </select>
+	    </div>
+	    <!--
+	    <div>
+		    <label for="scale">Select Scale</label>
+		    <select name="scale" id="scale">
+		      <option selected="" value="1000">1000</option>
+		      <option value="2000">2000</option>
+		      <option value="5000">5000</option>
+		      <option value="10000">10,000</option>
+		      <option value="25000">25,000</option>
+		      <option value="50000">50,000</option>
+		    </select>
+		</div>
+
+		<div>
+		    <label for="angle">Angle</label>
+		    <input type="number" name="angle" id="angle" />
+		</div>
+		-->
+		
+
+		<div class="accordinPanel" style="display: none">
+			<div>
+			    <label for="mapAuthor">Map Author</label>
+			    <input type="text" name="mapAuthor" id="mapAuthor" value="MCIC"/>
+			</div>
+			<div>
+			    <label for="mapCopyright">Copyright</label>
+			    <input type="text" name="mapCopyright" id="mapCopyright" value="City of Toronto"/>
+			</div>
+			<!--<div>
+				<label for="mapWidth">Map_Only width (px)</label>
+			    <input type="text" name="mapWidth" id="mapWidth" value="670"/>
+			</div>
+			<div>
+				<label for="mapHeight">Map_Only hieght (px)</label>
+			    <input type="text" name="mapHeight" id="mapHeight" value="500"/>
+			</div>
+			<div>
+				<label for="quality">Print quality (dpi))</label>
+			    <input type="text" name="quality" id="quality" value="96"/>
+			</div>-->
+		</div>
+
+		<div class="buttonWrapper">
+			<button id="advance">Advanced settings</button>
+	    	<button id="print">Submit Print Job</button>
+		</div>
+
+		<div class="dijitProgressBar dijitProgressBarEmpty dijitProgressBarIndeterminate hidden" role="progressbar" aria-labelledby="progressBar_label" aria-valuemin="0" aria-valuemax="100" 
+			id="progressBar">
+			<div class="dijitProgressBarFull">
+				<div class="dijitProgressBarTile" role="presentation"></div>
+			</div>
+			<div class="dijitProgressBarLabel" id="progressBar_label">Creating print</div>
+		</div>
+
+
+		<div class="printStatus">
+			<p></p>
+			<a href="#" target="_blank" class="hidden"></a>
+		</div>
+	</fieldset>
+</div>

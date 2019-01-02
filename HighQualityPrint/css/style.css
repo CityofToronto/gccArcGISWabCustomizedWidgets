@@ -1,0 +1,14 @@
+.ui-selectmenu-menu { z-index: 101 !important; }
+.hidden { display: none !important; }
+.error { color: red; }
+
+fieldset.highQualityPrint, .accordinPanel { display: flex; flex-direction: column; }
+
+fieldset.highQualityPrint > div, .accordinPanel > div { margin: 5px 0; display: flex; }
+fieldset.highQualityPrint > div > label, .accordinPanel > div > label { width: 120px; display: inline-block; margin-top: 6px;}
+fieldset.highQualityPrint .buttonWrapper { text-align: right; margin-top: 10px }
+
+fieldset.highQualityPrint input { padding: 5px; width: 15em;}
+fieldset.highQualityPrint .ui-selectmenu-button.ui-button { width: 17em; }
+#progressBar .dijitProgressBarFull { height: 14px; width: 100%; z-index: -1; }
+.printStatus p { font-size: 16px; }
