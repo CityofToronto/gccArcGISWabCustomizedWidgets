@@ -21,6 +21,8 @@
 /* near me widget results list */
 .esriViewPopup table td:first-child {width: 85px;}
 .esriViewPopup table tr { height: 20px; }
+
+.jimu-widget-attributetable .ui-state-active { background-color:  #005134 !important;} /* overwrite select widget - attribute comparison in attribute table */
 /* -------------------- overwrite esri default style end ----------------------- */
 
 

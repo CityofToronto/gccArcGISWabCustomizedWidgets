@@ -371,7 +371,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       // build category/program filter sql statement
       // use input value to get selected category value
       buildCategoryFilter: function() {
-        var yearFilter = [], statusFilter = [], categoryFilter = [], tt, program, sql;
+        var yearFilter = [], statusFilter = [], tt, categoryStat = "", statusStat = "", sql;
         $.each($('.current-year input:checked'), function(index, item) {
           yearFilter.push("NOT (INV_START_YEAR>" + item.value + " OR INV_END_YEAR<" + item.value + ")");
         });
@@ -379,12 +379,18 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           yearFilter.push("NOT (INV_START_YEAR>" + item.value + " OR INV_END_YEAR<" + item.value + ")");
         });
         $.each($('.project-status input:checked'), function(index, item) {
-          statusFilter.push("INV_STATUS = '" + item.value + "'");
+          if (index == 0) {
+            statusStat = "INV_STATUS = '" + item.value + "'";
+          } else {
+            statusStat += " OR INV_STATUS = '" + item.value + "'"
+          }
         });
         $.each($('.category input.layer-category:checked'), function(index, item){
-          program = item.value;
-          sql = "INV_DISPLAY_PROGRAM = '" + program + "'";
-          categoryFilter.push(sql);
+          if (index == 0) {
+            categoryStat = "INV_DISPLAY_PROGRAM = '" + item.value + "'";
+          } else {
+            categoryStat += " OR INV_DISPLAY_PROGRAM = '" + item.value + "'";
+          }
         });
 
         for (var i = 0; i < yearFilter.length; i++) {
@@ -394,21 +400,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             yearStat += " OR (" + yearFilter[i] + ")";
         }
 
-        for (var k = 0; k < statusFilter.length; k++) {
-          if (k == 0) 
-            statusStat = statusFilter[k];
-          else
-            statusStat += " OR " + statusFilter[k];
-        }
-
-        for (var j = 0; j < categoryFilter.length; j++) {
-          if (j == 0) 
-            categoryStat = categoryFilter[j];
-          else
-            categoryStat += " OR " + categoryFilter[j];
-        }
-
-        if (yearFilter.length > 0 && categoryFilter.length > 0 && statusFilter.length > 0) {
+        if (yearFilter.length > 0 && categoryStat.length > 0 && statusStat.length > 0) {
           tt = "(" + yearStat + ") AND (" + categoryStat + ") AND (" + statusStat + ")";
           this.categoryQuery = "(" + categoryStat + ") AND (" + statusStat + ")"; // only pass category and status, not years
         } else { 
@@ -420,7 +412,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       // build conflict/coordination filter sql statement
       buildConflictFilter: function() {
-        var yearFilter = [], statusFilter = [], conflictFilter = [], conflictStat = "COORD_STATUS = ''", bizOwner= "", tt;
+        var yearFilter = [], conflictStat = "COORD_STATUS = ''", bizOwner= "", tt, statusStat="";
         $.each($('.conflict-year input:checked'), function(index, item) {
           yearFilter.push("NOT (START_YEAR>" + item.value + " OR END_YEAR<" + item.value + ")");
         });
@@ -439,8 +431,12 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           }
         });
         $.each($('.conflict-status input:checked'), function(index, item) {
-          if (item.length > 0) statusFilter.push("IS_RESOLVED = '" + item.value + "'");
-          else statusFilter.push("IS_RESOLVED is null");
+          var s = (item.value!=''?("IS_RESOLVED='" + item.value + "'"):"IS_RESOLVED is null");
+          if (index == 0) {
+            statusStat = s;
+          } else {
+            statusStat += " OR " + s;
+          }
         });
 
         for (var i = 0; i < yearFilter.length; i++) {
@@ -449,18 +445,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           else
             yearStat += " OR (" + yearFilter[i] + ")";
         }
-        for (var k = 0; k < statusFilter.length; k++) {
-          if (k == 0) 
-            statusStat = statusFilter[k];
-          else
-            statusStat += " OR " + statusFilter[k];
-        }
 
-        //
-        // TODO: resolution checks 
-        //
-
-        if (yearFilter.length > 0 && conflictStat.length > 0  && statusFilter.length > 0) 
+        if (yearFilter.length > 0 && conflictStat.length > 0  && statusStat.length > 0) 
           tt = "(" + yearStat + ") AND (" + conflictStat + ") AND (" + statusStat + ")" + (bizOwner.length>0?" AND (" + bizOwner + ")":"");
         return tt;
       },
@@ -558,13 +544,13 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       getCoordContent:function(graphic) {
 
         var content = "<dl>" + 
-            "<dt>Coordination Status</dt><dd>" + (graphic.attributes.COORD_STATUS?graphic.attributes.COORD_STATUS:"") + "</dd>" + 
+            /*"<dt>Coordination Status</dt><dd>" + (graphic.attributes.COORD_STATUS?graphic.attributes.COORD_STATUS:"") + "</dd>" + 
             "<dt>Start Year</dt><dd>" + (graphic.attributes.START_YEAR?graphic.attributes.START_YEAR:"") + "</dd>" +
             "<dt>End Year</dt><dd>" + (graphic.attributes.END_YEAR?graphic.attributes.END_YEAR:"") + "</dd>" +
             (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
-            "<dt>Resolution Status</dt><dd>" + (graphic.attributes.IS_RESOLVED?graphic.attributes.IS_RESOLVED:"") + "</dd>" + 
-            "<dt>Plannned Work</dt><dd>" + (graphic.attributes.PLANNED_WORK?graphic.attributes.PLANNED_WORK:"") + "</dd>" + 
-            "<dt>Related Planned Work</dt><dd>" + (graphic.attributes.REL_PLANNED_WORK?graphic.attributes.REL_PLANNED_WORK:"") + "</dd>" + 
+            "<dt>Resolution Status</dt><dd>" + (graphic.attributes.IS_RESOLVED?graphic.attributes.IS_RESOLVED:"") + "</dd>" + */
+            "<dt>Project</dt><dd>" + (graphic.attributes.PLANNED_WORK?graphic.attributes.PLANNED_WORK:"") + "</dd>" + 
+            "<dt>Related</dt><dd>" + (graphic.attributes.REL_PLANNED_WORK?graphic.attributes.REL_PLANNED_WORK:"") + "</dd>" + 
             (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
                           "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
                           "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
