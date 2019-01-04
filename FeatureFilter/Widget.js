@@ -550,7 +550,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
             "<dt>Resolution Status</dt><dd>" + (graphic.attributes.IS_RESOLVED?graphic.attributes.IS_RESOLVED:"") + "</dd>" + */
             "<dt>Project</dt><dd>" + (graphic.attributes.PLANNED_WORK?graphic.attributes.PLANNED_WORK:"") + "</dd>" + 
-            "<dt>Related</dt><dd>" + (graphic.attributes.REL_PLANNED_WORK?graphic.attributes.REL_PLANNED_WORK:"") + "</dd>" + 
+            "<dt>Related</dt><dd class='scrollable'>" + (graphic.attributes.REL_PLANNED_WORK?graphic.attributes.REL_PLANNED_WORK:"") + "</dd>" + 
             (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
                           "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
                           "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +

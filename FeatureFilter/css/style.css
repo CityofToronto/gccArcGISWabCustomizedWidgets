@@ -75,6 +75,14 @@ fieldset.category > button { margin-bottom: 5px; }
 .esriPopupWrapper dl, .esriMobileInfoViewItem dl { display: flex; flex-flow: row; flex-wrap: wrap; }
 .esriPopupWrapper dt, .esriMobileInfoViewItem dt { font-weight: 700; flex: 0 0 33%; text-overflow: ellipsis; overflow: hidden;}
 .esriPopupWrapper dd, .esriMobileInfoViewItem dd { flex:0 0 64%; margin-left: auto; text-align: left; text-overflow: ellipsis; overflow: hidden; }
+/* table in popup */
+.esriPopupWrapper dd table { min-width: 500px; border-collapse: collapse;}
+.esriPopupWrapper dd table tr:nth-child(2) { background: #ccc; }
+.esriPopupWrapper dd table tr td:first-child, .esriMobileInfoView .esriViewPopup dd table tr td:first-child { vertical-align: middle; padding-left: 5px; width: 30px;}
+
+.esriPopupWrapper dd.scrollable, .esriMobileInfoViewItem dd.scrollable { overflow: scroll;}
+.esriPopupWrapper dl th, .esriMobileInfoView .esriViewPopup dl th { display: table-cell; }
+
 .esriPopupWrapper dt, .esriPopupWrapper dd, .esriPopupWrapper p, .esriPopupWrapper tr, 
 .esriMobileInfoViewItem dd, .esriMobileInfoViewItem dt, .esriMobileInfoView .esriViewPopup tr { font-size: 12px; margin-bottom: 4px;}
 .esriPopupWrapper th, .esriMobileInfoView .esriViewPopup th { display: none; }
