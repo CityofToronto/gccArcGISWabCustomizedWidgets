@@ -273,9 +273,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         $popup = $(".esriPopup .contentPane");
         var observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
-            var cssClass = $(".esriPopup").attr('class');
-            if (cssClass.indexOf("esriPopupVisible") >= 0 )
-            $(".infoTabs").tabs();
+            var cssClass = $(".esriPopup").attr('class'), activeTab = $("#tabs").tabs("option", "active");
+            if (cssClass.indexOf("esriPopupVisible") >= 0 ) {
+              if (activeTab == 0) {
+                $(".infoTabs").tabs();
+              }
+              if (activeTab == 1) {
+                $(".esriPopupWrapper .sizer").css("width", "400px");
+              }
+              
+            }
           });    
         });
         observer.observe($popup[0], {childList: true});
@@ -543,7 +550,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       getCoordContent:function(graphic) {
 
-        var content = "<dl>" + 
+        var content = "<dl class='coordination'>" + 
             /*"<dt>Coordination Status</dt><dd>" + (graphic.attributes.COORD_STATUS?graphic.attributes.COORD_STATUS:"") + "</dd>" + 
             "<dt>Start Year</dt><dd>" + (graphic.attributes.START_YEAR?graphic.attributes.START_YEAR:"") + "</dd>" +
             "<dt>End Year</dt><dd>" + (graphic.attributes.END_YEAR?graphic.attributes.END_YEAR:"") + "</dd>" +
