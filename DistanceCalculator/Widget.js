@@ -20,7 +20,10 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
       this.fetchDataByName('Feature Filter');
       var map = this.map;
       var strCode = '<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">'; 
-      strCode += '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.0/mustache.min.js"></script>'
+      if (typeof Mustache === 'object') { 
+      } else {
+        strCode += '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.0/mustache.min.js"></script>'
+      }
       $(".appCode").html(strCode);
       $("#btnCalculate").button();
 
@@ -46,6 +49,7 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         distanceByYear = [];
         Promise.all(that.queryDistance()).then(function(data){
           var template = $('#distanceSum').html();
+
           var html = Mustache.to_html(template, {"result": distanceByYear});
           $('#totalDistanceContent').html(html);
           $("#loader").addClass("hidden");
