@@ -14,8 +14,9 @@ function(declare, BaseWidget, ArcgisUtils, PrintTask, GeoProcessor, $) {
      printableLayers: [],
      basemapLayers: [],
 
-  	startup: function() {
+    startup: function() {
   		this.inherited(arguments);
+      var serviceUrl = this.config.service_url;
       var strCode = '<link rel="stylesheet" href="./widgets/HighQualityPrint/css/jquery-ui.css">'; 
       $("#appCode").html(strCode);
 
@@ -57,14 +58,14 @@ function(declare, BaseWidget, ArcgisUtils, PrintTask, GeoProcessor, $) {
             "legendOptions" : {
               "operationalLayers" : that.printableLayers
             }
-          },
+          }/*,
           exportOptions: {
             "outputSize": [$("#mapWidth").val(), $("#mapHeight").val()],
             "dpi": $("#quality").val()
-          }
+          }*/
         };
 
-        gp = new GeoProcessor("https://gis-intra-qa.toronto.ca/arcgis/rest/services/gp/MapAdvancedHighQualityPrinting/GPServer/MapAdvancedHighQualityPrinting/");
+        gp = new GeoProcessor(serviceUrl);
         var inputdata = {
           "Web_Map_as_JSON" : JSON.stringify(printMapJson),
           "Format" : $("#format").val(),
@@ -84,7 +85,7 @@ function(declare, BaseWidget, ArcgisUtils, PrintTask, GeoProcessor, $) {
       $("#progressBar").addClass("hidden");
       if (event.jobStatus == "esriJobSucceeded") {
         gp.getResultData(event.jobId, "Output_File", function(result) {
-          console.log(result);
+          //console.log(result);
           $(".printStatus a").attr("href", result.value.url).text("CLICK TO OPEN").removeClass("hidden");
           $('.printStatus > p').addClass("hidden");
         });

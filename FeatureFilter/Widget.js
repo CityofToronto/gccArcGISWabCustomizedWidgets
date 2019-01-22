@@ -254,7 +254,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             that.toggleOtherInfoLayerVisibility();
           } else { 
             if (activeTab == "conflict") {
-              if ($('.coordination input.layer-category:checked').length == 0) {
+              if ($('.coordination input.layer-category:checked').length == 0 && $('.coordBizOwner input.layer-category:checked').length > 0) {
                 $( "#dialog" ).dialog( "open" );
               }
             }
