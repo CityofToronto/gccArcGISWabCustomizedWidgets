@@ -58,3 +58,7 @@ Search/
 Splash/
 ZoomSlider/
 Select/
+
+# ignore libraries
+######################
+jquery-ui.css
