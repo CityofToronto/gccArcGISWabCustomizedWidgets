@@ -49,7 +49,7 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
         distanceByYear = [];
         Promise.all(that.queryDistance()).then(function(data){
           var template = $('#distanceSum').html();
-
+          distanceByYear.sort((a,b) => a.year - b.year);
           var html = Mustache.to_html(template, {"result": distanceByYear});
           $('#totalDistanceContent').html(html);
           $("#loader").addClass("hidden");
@@ -86,9 +86,9 @@ function(declare, BaseWidget, ArcgisUtils, Query, QueryTask, GeometryEngine, $) 
     calculateTotalDistanceByYear: function (year) {
         return function (resultData) {
           var distance = resultData.features.filter(i => i.attributes.LENGTH > 0);
-          var totalDistance = distance.reduce((a, b) => +a + +b.attributes.LENGTH, 0);
-          distance.filter(i => i.attributes.LENGTH = i.attributes.LENGTH.toLocaleString());
-          distanceByYear.push({"details": distance, "year": year, "totalLengthByYear": totalDistance.toLocaleString()});
+          var totalDistance = distance.reduce((a, b) => +a + +b.attributes.LENGTH, 0)/1000;
+          distance.filter(i => i.attributes.LENGTH = (i.attributes.LENGTH/1000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})); // ormatted string in the default locale, e.g. 3,500
+          distanceByYear.push({"details": distance, "year": year, "totalLengthByYear": totalDistance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})});
         }
     },
 
