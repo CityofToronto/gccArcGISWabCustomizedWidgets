@@ -1,0 +1,5 @@
+.container { font-size: 1em; }
+.esriPopup .contentPane { display: flex; flex-direction: row; flex-wrap: wrap; }
+.detail { width: 42%; }
+.title { font-weight: 700; width: 53%; }
+.locate { margin-left: 5px; font-size: 1.5em; font-weight: 700;}
