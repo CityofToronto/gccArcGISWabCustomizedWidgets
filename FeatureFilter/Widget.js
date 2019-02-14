@@ -61,10 +61,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         for (var i = 0; i < 6; i++) {
           $('label[for="currYear' + i + '"]').text(currentYear+i);
           $('#currYear' + i).val(currentYear+i);
-          if (i > 0) {
+          //if (i > 0) {
             $('label[for="conflictYear' + i + '"]').text(currentYear+i);
             $('#conflictYear' + i).val(currentYear+i);
-          }
+          //}
         }
         for (var i = 0; i < 7; i++) {
           $('label[for="pastYear' + i + '"]').text(currentYear-i-1);
@@ -83,7 +83,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           progInfoTemplate.setContent(this.getTextContent);
 
           var coordInfoTemplate = new InfoTemplate();
-          coordInfoTemplate.setTitle("${INV_PROJECT}");
+          coordInfoTemplate.setTitle("${COORD_STATUS}");
           coordInfoTemplate.setContent(this.getCoordContent);          
 
           for (var i = 0; i < myLayers.length; i++) {
@@ -432,9 +432,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
         $.each($('.coordBizOwner input.layer-category:checked'), function(index, item){
           if (index == 0) {
-            bizOwner = "INV_OWNER = '" + item.value + "'"
+            bizOwner = "INV_DISPLAY_OWNER = '" + item.value + "'"
           } else {
-            bizOwner += " OR INV_OWNER = '" + item.value + "'"
+            bizOwner += " OR INV_DISPLAY_OWNER = '" + item.value + "'"
           }
         });
         $.each($('.conflict-status input:checked'), function(index, item) {

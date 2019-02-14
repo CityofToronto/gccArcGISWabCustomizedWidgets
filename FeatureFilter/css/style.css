@@ -13,12 +13,13 @@
 .jimu-widget-bookmark .jimu-img-node { overflow: visible !important; width: 100% !important; }
 .jimu-widget-bookmark .jimu-img-node .node-label { width: 100% !important; text-align: left !important; height: 1.8em !important; cursor: pointer;}
 .jimu-widget-bookmark .jimu-img-node .node-box { display: none }
-.jimu-widget-bookmark .list .jimu-img-node { height: 20px !important;}
+.jimu-widget-bookmark .list .jimu-img-node, .jimu-img-node .drag-masker, .jimu-widget-bookmark .list .jimu-img-node .dijitTextBox { height: 20px !important; overflow-y: hidden !important;}
 .mobile.jimu-widget-bookmark .jimu-img-node { height: 25px !important; }
 .mobile.jimu-widget-bookmark .jimu-img-node .dijitTextBoxDisabled, 
 .mobile.jimu-widget-bookmark .jimu-img-node .dijitTextBox .dijitInputField, 
 .jimu-widget-bookmark .list .jimu-img-node .dijitTextBoxDisabled, 
-.jimu-widget-bookmark .list .jimu-img-node .dijitTextBox .dijitInputField { width: calc(100% - 60px) !important;}
+.jimu-widget-bookmark .list .jimu-img-node .dijitTextBox .dijitInputField { width: calc(100% - 55px) !important;}
+.jimu-widget-bookmark .drawer-handle .separate-line { border-top: none !important;}
 
 /* measurement widget owerwrite */
 #tabs, .esriMeasurement { border: none; background-color: #f5f5f5; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);}
@@ -28,7 +29,7 @@
 .esriViewPopup table td:first-child {width: 85px;}
 .esriViewPopup table tr { height: 20px; }
 
-.jimu-widget-attributetable .ui-state-active { background-color:  #005134 !important;} /* overwrite select widget - attribute comparison in attribute table */
+.jimu-widget-attributetable .ui-state-active.dgrid-row { background-color:  #005134 !important;} /* overwrite select widget - attribute comparison in attribute table */
 /* -------------------- overwrite esri default style end ----------------------- */
 
 
@@ -78,7 +79,7 @@ fieldset.category > button { margin-bottom: 5px; }
 .esriPopup .titlePane { white-space: nowrap;}
 .esriPopupWrapper .contentPane,
 .esriPopupWrapper .actionsPane,  .esriMobileInfoView { background-color: #f5f5f5 /*#FDFDF5*/; }
-.esriPopupWrapper .title { width: 70%; }
+.esriPopupWrapper .title { width: 70%; white-space: normal;}
 .esriPopupWrapper dl, .esriMobileInfoViewItem dl { display: flex; flex-flow: row; flex-wrap: wrap; }
 .esriPopupWrapper dt, .esriMobileInfoViewItem dt { font-weight: 700; flex: 0 0 33%; text-overflow: ellipsis; overflow: hidden;}
 .esriPopupWrapper dd, .esriMobileInfoViewItem dd { flex: 0 0 64%; margin-left: auto; text-align: left; text-overflow: ellipsis; overflow: hidden; }
