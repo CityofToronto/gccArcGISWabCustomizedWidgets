@@ -275,12 +275,12 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           mutations.forEach(function(mutation) {
             var cssClass = $(".esriPopup").attr('class'), activeTab = $("#tabs").tabs("option", "active");
             if (cssClass.indexOf("esriPopupVisible") >= 0 ) {
-              if (activeTab == 0) {
+              //if (activeTab == 0) {
                 $(".infoTabs").tabs();
-              }
-              if (activeTab == 1) {
+              //}
+              //if (activeTab == 1) {
                 $(".esriPopupWrapper .sizer").css("width", "400px");
-              }
+              //}
               
             }
           });    

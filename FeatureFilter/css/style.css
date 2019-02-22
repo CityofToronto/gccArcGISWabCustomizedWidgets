@@ -85,7 +85,7 @@ fieldset.category > button { margin-bottom: 5px; }
 .esriPopupWrapper dd, .esriMobileInfoViewItem dd { flex: 0 0 64%; margin-left: auto; text-align: left; text-overflow: ellipsis; overflow: hidden; }
 
 .esriPopupWrapper dt, .esriPopupWrapper dd, .esriPopupWrapper p, .esriPopupWrapper tr, 
-.esriMobileInfoViewItem dd, .esriMobileInfoViewItem dt, .esriMobileInfoView .esriViewPopup tr { font-size: 12px; margin-bottom: 4px;}
+.esriMobileInfoViewItem dd, .esriMobileInfoViewItem dt, .esriMobileInfoView .esriViewPopup tr { font-size: 12px; margin-bottom: 4px; font-family: Arial, Helvetica, sans-serif;}
 .esriPopupWrapper th, .esriMobileInfoView .esriViewPopup th { display: none; }
 .esriPopupWrapper tr td:first-child, .esriMobileInfoView .esriViewPopup tr td:first-child { font-weight: 700; vertical-align: top; width: 120px;} 
 .infoTabs.ui-tabs div.ui-tabs-panel { padding: 8px 5px !important; }
