@@ -50,22 +50,25 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
         {
           infoTemplate: infoTemplate,
           outFields: ["*"],
-          definitionExpression: fieldName + " IN " + paramValue
+          definitionExpression: fieldName + " IN " + paramValue,
+          minScale: 300000
         });
 
         // rerender feature layer
         var rerenderSymbol = "";
+        var that = this;
         $.getJSON(queryLayer.url + "?f=json", function(response) {
           if (response.geometryType.toLowerCase().indexOf("point") >=0) {
-            rerenderSymbol = {"color":[0,95,162,255],"size":10,"type":"esriSMS","style":"esriSMSCircle"};
+            rerenderSymbol = that.config.symbol.point;
           }
           if (response.geometryType.toLowerCase().indexOf("polyline") >=0) {
-            rerenderSymbol = {"color":[0,95,162,255],"width":4,"type":"esriSLS","style":"esriSLSSolid"};
+            rerenderSymbol = that.config.symbol.linear;
           }
           if (response.geometryType.toLowerCase().indexOf("polygon") >=0) {
-            rerenderSymbol = {"color":[0,95,162,128],"width":4,"type":"esriSFS","style":"esriSFSSolid"};
+            rerenderSymbol = that.config.symbol.polygon;
           }
           featureLayer.setRenderer(new SimpleRenderer(JsonUtils.fromJson(rerenderSymbol)));
+
           map.addLayer(featureLayer);
         })
 
@@ -80,6 +83,8 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
       } else {
         $( "#dialog" ).dialog("open");
       } 
+
+
     },
 
     findFeatures: function(data) {
