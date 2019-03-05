@@ -13,10 +13,8 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
   return declare(BaseWidget, {
 
     name: 'URL Query',
-    layers: [],
     map: null,
-    fieldName: null,
-    queryLayer: null,
+    urlValues: [],
 
     startup: function(){
       var strCode = '<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">'; 
@@ -28,20 +26,21 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
       // put related layers to array
       if (this.map.itemId) {
         map = this.map;
-        mapLayers = ArcgisUtils.getLayerList(this.map);
-        var layerList = this.config.layerName;
+        mapLayers = ArcgisUtils.getLayerList(map);
+        var layerList = this.config.layerName, layers = [];
         for (var i = 0; i < mapLayers.length; i++) {
           var title = mapLayers[i].title.toLowerCase();
           if ($.inArray(title, layerList) >=0) {
-            this.layers.push({"name": title, "url": mapLayers[i].layer.url, "index": i});
+            layers.push({"name": title, "url": mapLayers[i].layer.url, "index": i});
           }
         }
       }
 
       var layerName = this.getURLParams('layer');
+      var fieldName = this.getURLParams("field");
       var paramValue = "(" + this.getURLParams('value') + ")";
-      fieldName = this.getURLParams("field");
-      queryLayer = this.layers.filter(function(item){return item.name == layerName})[0];
+      urlValues = this.getURLParams('value').split(",");
+      var queryLayer = layers.filter(function(item){return item.name == layerName})[0];
 
       if (layerName && paramValue && fieldName && queryLayer) {
         // add layer to map
@@ -76,13 +75,11 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
         // query features to zoom to selected features
         var query = new Query();
         query.where = fieldName + " IN " + paramValue;
-        query.outSpatialReference = this.map.spatialReference;
+        query.outSpatialReference = map.spatialReference;
         query.returnGeometry = true;
         query.outFields = ["*"];
         featureLayer.selectFeatures(query, FeatureLayer.SELECTION_NEW, this.findFeatures);
-      } else {
-        $( "#dialog" ).dialog("open");
-      } 
+      }
 
 
     },
@@ -105,7 +102,8 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
         }
 
         map.centerAndZoom(centrePoint, 20);
-      } else {
+      } 
+      if (data.length != urlValues.length) {
         $( "#dialog" ).dialog("open");
       }
         
