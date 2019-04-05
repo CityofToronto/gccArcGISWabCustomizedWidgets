@@ -2,9 +2,10 @@ define(["dojo/_base/declare",
   "jimu/BaseWidget",
   "esri/arcgis/utils",
   "esri/tasks/PrintTask",
+  "esri/tasks/PrintParameters",
   "esri/tasks/Geoprocessor",
   'jimu/loaderplugins/jquery-loader!https://code.jquery.com/jquery-3.2.1.min.js, https://code.jquery.com/ui/1.12.1/jquery-ui.js'],
-function(declare, BaseWidget, ArcgisUtils, PrintTask, GeoProcessor, $) {
+function(declare, BaseWidget, ArcgisUtils, PrintTask, PrintParameters, GeoProcessor, $) {
   return declare([BaseWidget], {
 
      baseClass: 'jimu-widget-highQualityPrint',
@@ -41,8 +42,22 @@ function(declare, BaseWidget, ArcgisUtils, PrintTask, GeoProcessor, $) {
 
       var that = this;
       $("#print").click(function(){
+        var printTask = new PrintTask(that.config.print_task);   
+        var printParams = new PrintParameters();
+        printParams.map = that.map;
+        printParams.template = $("#template").val();
+        printParams.outSpatialReference = that.map.extent.spatialReference;
+        var webMapAsJSON = printTask._getPrintDefinition(that.map, printParams);
+        var graphicLayers = [];
+        for(var i=0;i<webMapAsJSON.operationalLayers.length;i++) {
+          if (webMapAsJSON.operationalLayers[i].featureCollection != undefined) {
+            graphicLayers.push(webMapAsJSON.operationalLayers[i]);
+          }
+        }
+        var oLayer = that.basemapLayers.concat(that.printableLayers);
+        var allLayers = oLayer.concat(graphicLayers);
         var printMapJson = {
-          operationalLayers: $.merge($.merge([], that.basemapLayers), that.printableLayers),
+          operationalLayers: allLayers,
           mapOptions: {
             "scale" : that.map.getScale(),
             //"rotation" : $("#angle").val()?parseInt($("#angle").val()):0,
