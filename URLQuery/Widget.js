@@ -27,7 +27,7 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
       if (this.map.itemId) {
         map = this.map;
         mapLayers = ArcgisUtils.getLayerList(map);
-        var layerList = this.config.layerName, layers = [];
+        var layerList = this.config.layerName.map(v => v.toLowerCase()), layers = [];
         for (var i = 0; i < mapLayers.length; i++) {
           var title = mapLayers[i].title.toLowerCase();
           if ($.inArray(title, layerList) >=0) {
@@ -36,7 +36,7 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
         }
       }
 
-      var layerName = this.getURLParams('layer');
+      var layerName = this.getURLParams('layer').toLowerCase();
       var fieldName = this.getURLParams("field");
       var paramValue = "(" + this.getURLParams('value') + ")";
       urlValues = this.getURLParams('value').split(",");
