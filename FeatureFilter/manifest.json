@@ -1,5 +1,6 @@
 {
-  "name": "Feature Filter",
+  "name": "FeatureFilter",
+  "label": "Feature Filter",
   "2D": true,
   "3D": false,
   "platform": "HTML",

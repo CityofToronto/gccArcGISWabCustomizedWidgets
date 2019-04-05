@@ -16,7 +16,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       mapProgramLayerInfo: [],
       mapCoordinationLayerInfo: [],
       mapOtherLayerInfo: [],
-      categoryQuery: '', // parameter to pass to calculate distance
 
       startup: function() {
         this.inherited(arguments);
@@ -29,10 +28,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $("div.btnContainer").addClass("hidden");
         }
 
-        this.createLayerGroup("category", $('.category')[0], config.program, 0, legendUrl);
-        //this.createLayerGroup("restriction", $('.restriction')[0], config.restriction, 0, legendUrl);
-        this.createLayerGroup("conflict", $('.conflict')[0], config.coordination, 0, legendUrl);
-        this.createLayerGroup("otherInfo", $('.otherInfo')[0], config.other, 0, legendUrl);
+        // generate layer list with checkboxes for all tabs
+        this.createLayerGroup("tab1", '', config.groupLayer1, 0, legendUrl);
+        this.createLayerGroup("tab2", '', config.groupLayer2, 0, legendUrl);
+        this.createLayerGroup("tab3", '', config.groupLayer3, 0, legendUrl);
+        this.createLayerGroup("tab4", '', config.groupLayer4, 0, legendUrl);
 
         // jquery ui element initialization
         $( "#tabs" ).tabs();
@@ -46,52 +46,42 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
         $("fieldset button, #btnApply").button();
 
-        $( "#dialog" ).dialog({
-          autoOpen: false,
-          modal: true,
-          buttons: {
-            OK: function() {
-              $( this ).dialog( "close" );
-            }
-          }
-        });
-
         var d = new Date();
         var currentYear = d.getFullYear();
-        for (var i = 0; i < 6; i++) {
-          $('label[for="currYear' + i + '"]').text(currentYear+i);
-          $('#currYear' + i).val(currentYear+i);
-          //if (i > 0) {
-            $('label[for="conflictYear' + i + '"]').text(currentYear+i);
-            $('#conflictYear' + i).val(currentYear+i);
-          //}
+        if (config.currentYearButton) {
+          for (var i = 0; i < 6; i++) {
+            $('label[for="currYear' + i + '"]').text(currentYear+i);
+            $('#currYear' + i).val(currentYear+i);
+            if (i > 0) {
+              $('label[for="conflictYear' + i + '"]').text(currentYear+i);
+              $('#conflictYear' + i).val(currentYear+i);
+            }
+          }
         }
-        for (var i = 0; i < 7; i++) {
-          $('label[for="pastYear' + i + '"]').text(currentYear-i-1);
-          $('#pastYear' + i).val(currentYear-i-1);
+        if (config.pastYearButton) {
+          for (var i = 0; i < 7; i++) {
+            $('label[for="pastYear' + i + '"]').text(currentYear-i-1);
+            $('#pastYear' + i).val(currentYear-i-1);
+          }
         }
 
-        var strCode = '<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">'; 
+        // attach jqueyr ui stylesheet
+        var strCode = '<link rel="stylesheet" href="./widgets/FeatureFilter/css/jquery-ui.css">'; 
         $("#appCode").html(strCode);
 
         // put related layers to array
         if (this.map.itemId) {
           var myLayers = ArcgisUtils.getLayerList(this.map);
 
-          var progInfoTemplate = new InfoTemplate();
-          progInfoTemplate.setTitle("${INV_OWNER}");
-          progInfoTemplate.setContent(this.getTextContent);
-
-          var coordInfoTemplate = new InfoTemplate();
-          coordInfoTemplate.setTitle("${COORD_STATUS}");
-          coordInfoTemplate.setContent(this.getCoordContent);          
+          var infoTemplate = new InfoTemplate();
+          infoTemplate.setTitle("${INV_OWNER}");
+          infoTemplate.setContent(this.getTextContent);
 
           for (var i = 0; i < myLayers.length; i++) {
             if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf("program") >= 0) {
-              myLayers[i].layer.infoTemplate = progInfoTemplate;
+              myLayers[i].layer.infoTemplate = infoTemplate;
               this.mapProgramLayerInfo.push(myLayers[i].layer);
             } else if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf("coordination") >= 0) {
-              myLayers[i].layer.infoTemplate = coordInfoTemplate;
               this.mapCoordinationLayerInfo.push(myLayers[i].layer);
             } else {
               this.mapOtherLayerInfo.push(myLayers[i].layer);
@@ -111,7 +101,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
           // disable / enable select all program buttons
           this.map.on("extent-change", function(ext){
-            if ($("#map").attr("data-zoom") >= 5) {
+            if ($("#map").attr("data-zoom") > 12) {
               $(".btnSelectAll").button("option", "disabled", false);
             } else {
               $(".btnSelectAll").button("option", "disabled", true);
@@ -128,7 +118,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
         var that = this;
         // group heading checkbox event
-        $('fieldset.feature-group').on('change', '.layer-heading', function(){
+        $('#tabs fieldset.feature-group').on('change', '.layer-heading', function(){
           var childCategories = $(this).parent('.group-layer-heading').siblings('.layer-row, .group-layer-row');
           var groupHeadingLabel = childCategories.find('label');
           childCategories.find('input').prop('checked', this.checked);
@@ -163,7 +153,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
 
         // category checkbox event
-        $('fieldset.feature-group').on('change', '.layer-category', function(){
+        $('#tabs fieldset.feature-group').on('change', '.layer-category', function(){
           var groupHeadings = $(this).parents('.group-layer-row');
           var checkedCategory, noOfAllCategories, groupHeadingLabel
           for (var i = 0; i < groupHeadings.length; i++) {
@@ -223,21 +213,28 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
         // select / unselect all programs
         $('.btnSelectAll').click(function(){
-          var text = $(this).children("span").text();
           var childCategories = $(this).parent('fieldset').find('input');
           var groupHeadingLabel = $(this).parent('fieldset').find('label');
-          if (text == 'Select') {
-            text = "Unselect"; 
-            childCategories.prop('checked', true);
-            groupHeadingLabel.addClass('ui-checkboxradio-checked ui-state-active');
-            groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-blank').addClass('ui-icon-check ui-state-checked');
-          } else {
-            text = "Select";
-            childCategories.prop('checked', false);
-            groupHeadingLabel.removeClass('ui-checkboxradio-checked ui-state-active');
-            groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-check ui-state-checked').addClass('ui-icon-blank');
+          childCategories.prop('checked', true);
+          groupHeadingLabel.addClass('ui-checkboxradio-checked ui-state-active');
+          groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-blank').addClass('ui-icon-check ui-state-checked');
+
+          if (!that.showApplyButton) {
+            $('#btnApply').click();
           }
-          $(this).children("span").text(text);
+        });
+
+        $('.btnUnselectAll').click(function(){
+          var childCategories = $(this).parent('fieldset').find('input');
+          var groupHeadingLabel = $(this).parent('fieldset').find('label');
+          childCategories.prop('checked', false);
+          groupHeadingLabel.removeClass('ui-checkboxradio-checked ui-state-active');
+          groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-check ui-state-checked').addClass('ui-icon-blank');
+          
+          if (!that.showApplyButton) {
+            $('#btnApply').click();
+          }
+          
         });
 
         // open / close current or past years group
@@ -250,57 +247,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           var activeTabIndex = $("#tabs").tabs("option", "active");
           var activeTab = $("#tabs li").eq(activeTabIndex).attr("data-attr");
 
-          if (activeTab == "otherInfo") {
+          if (activeTab != "filteredLayers") {
             that.toggleOtherInfoLayerVisibility();
           } else { 
-            if (activeTab == "conflict") {
-              if ($('.coordination input.layer-category:checked').length == 0 && $('.coordBizOwner input.layer-category:checked').length > 0) {
-                $( "#dialog" ).dialog( "open" );
-              }
-            }
             that.buildLayer(activeTab);
           }
-
-          // publish selected years in Program tab for distance calculation
-          var selectedYears = [];
-          $('.current-year input.year-selector:checked, .past-year input.year-selector:checked').each(function() {
-             selectedYears.push({"year": this.value}); 
-          });
-          that.publishData([selectedYears, that.categoryQuery]);
-        });
-
-        // watch info window to initialize jquery ui tab
-        $popup = $(".esriPopup .contentPane");
-        var observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            var cssClass = $(".esriPopup").attr('class'), activeTab = $("#tabs").tabs("option", "active");
-            if (cssClass.indexOf("esriPopupVisible") >= 0 ) {
-              //if (activeTab == 0) {
-                $(".infoTabs").tabs();
-              //}
-              //if (activeTab == 1) {
-                $(".esriPopupWrapper .sizer").css("width", "400px");
-              //}
-              
-            }
-          });    
-        });
-        observer.observe($popup[0], {childList: true});
-
-        /*$mobilePop = $(".esriMobileInfoView");
-        var observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            console.log(mutation);
-            console.log($(mutation.target));
-            if ($(mutation.target).attr('style') == "display: block;" )
-            $(mutation.target).find(".infoTabs").tabs();
-          });    
-        });
-        observer.observe($mobilePop[0], {attributes: true});
-        */
-        
-        $(".esriPopupMobile .titleButton.arrow").click(function(e){
-           $(".infoTabs").tabs();
         });
         
       },
@@ -316,10 +267,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           } else {
             groupHeadingValue = groupInfo[grouplayer].id;
           }
-          html = "<div class='group-layer-row" + (groupInfo[grouplayer].class?" " + groupInfo[grouplayer].class:"") + "'>" + 
+          html = "<div class='group-layer-row" + (groupInfo[grouplayer].class?" " + groupInfo[grouplayer].class:"") + "'>" +
                         "<div class='group-layer-heading'>" + 
-                          "<span class='headingIcon'></span>" + 
-                          (groupInfo[grouplayer].legend?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
+                          "<span class='" + (groupInfo[grouplayer].layers?"headingIcon":"headingIconPlaceolder") + "'></span>" + 
+                          (groupInfo[grouplayer].legend&&groupInfo[grouplayer].legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
                           "<label for='" + groupName  + "'>" + grouplayer + "</label><input type='checkbox' class='layer-heading' value='" + groupHeadingValue + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
                         "</div>" + 
                       "</div>";
@@ -342,7 +293,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       addLayerNode: function(tab, layerInfo, layerIndex, level, toDomNode, legendUrl) {
         var html = "<div class='layer-row'>" + 
-                      (layerInfo.legend?"<span><img src='" + legendUrl + layerInfo.legend + "' alt='" + layerInfo.label + " legend' /></span>":"") +
+                      (layerInfo.legend&&layerInfo.legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + layerInfo.legend + "' alt='" + layerInfo.label + " legend' /></span>":"") +
                       "<label for='checkbox-" + layerInfo.id  + "'>" + layerInfo.label + "</label><input type='checkbox' class='layer-category' value='" + layerInfo.id + "' name='checkbox-" +  layerInfo.id + "' id='checkbox-" +  layerInfo.id + "'>" + 
                     "</div>";
         if (level == 0) {
@@ -355,12 +306,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       // show features according to filters
       buildLayer: function(propertyType) {
         var layerDef = "", mapLayerInfo;
-        if (propertyType == 'category' /*|| propertyType == 'restriction'*/) {
+        if (propertyType == 'category') {
           layerDef = this.buildCategoryFilter();
           mapLayerInfo = this.mapProgramLayerInfo;
         }
-        if (propertyType == 'conflict') {
-          
+        if (propertyType == 'conflict') {  
           layerDef = this.buildConflictFilter();
           mapLayerInfo = this.mapCoordinationLayerInfo;
         }
@@ -372,11 +322,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
               mapLayerInfo[i].setVisibility(false);
             }
         }
-        
       },
 
       // build category/program filter sql statement
-      // use input value to get selected category value
       buildCategoryFilter: function() {
         var yearFilter = [], statusFilter = [], tt, categoryStat = "", statusStat = "", sql;
         $.each($('.current-year input:checked'), function(index, item) {
@@ -432,9 +380,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         });
         $.each($('.coordBizOwner input.layer-category:checked'), function(index, item){
           if (index == 0) {
-            bizOwner = "INV_DISPLAY_OWNER = '" + item.value + "'"
+            bizOwner = "INV_OWNER = '" + item.value + "'"
           } else {
-            bizOwner += " OR INV_DISPLAY_OWNER = '" + item.value + "'"
+            bizOwner += " OR INV_OWNER = '" + item.value + "'"
           }
         });
         $.each($('.conflict-status input:checked'), function(index, item) {
@@ -485,9 +433,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         }
       },
 
+
       // set info window content
       getTextContent:function(graphic) {
-
         var content = "<dl>" +
                           (graphic.attributes.INV_PROJECT?"<dt>Project</dt><dd>" + graphic.attributes.INV_PROJECT + "</dd>":"") + 
                           (graphic.attributes.INV_LOCATION?"<dt>Location</dt><dd>" + graphic.attributes.INV_LOCATION + "</dd>":"") + 
@@ -548,50 +496,19 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         return tabs; 
       },
 
-      getCoordContent:function(graphic) {
-
-        var content = "<dl class='coordination'>" + 
-            /*"<dt>Coordination Status</dt><dd>" + (graphic.attributes.COORD_STATUS?graphic.attributes.COORD_STATUS:"") + "</dd>" + 
-            "<dt>Start Year</dt><dd>" + (graphic.attributes.START_YEAR?graphic.attributes.START_YEAR:"") + "</dd>" +
-            "<dt>End Year</dt><dd>" + (graphic.attributes.END_YEAR?graphic.attributes.END_YEAR:"") + "</dd>" +
-            (graphic.attributes.LAST_UPDATED_DATE?"<dt>Last Updated</dt><dd>" + locale.format(new Date(graphic.attributes.LAST_UPDATED_DATE), {datePattern:'MMM dd, yyyy.', selector:'date'}) + "</dd>":"") + 
-            "<dt>Resolution Status</dt><dd>" + (graphic.attributes.IS_RESOLVED?graphic.attributes.IS_RESOLVED:"") + "</dd>" + */
-            "<dt>Project</dt><dd>" + (graphic.attributes.PLANNED_WORK?graphic.attributes.PLANNED_WORK:"") + "</dd>" + 
-            "<dt>Related</dt><dd class='scrollable'>" + (graphic.attributes.REL_PLANNED_WORK?graphic.attributes.REL_PLANNED_WORK:"") + "</dd>" + 
-            (graphic.attributes.INV_PTPWU_WORK_ID?"<dt>PTP Work Unit</dt><dd>" +"<form name='workunit' id='workunit' target='_blank' method='post' " + 
-                          "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
-                          "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
-                          "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +
-                          "</form><a href=\"#\" onclick=\"document.getElementById(\'workunit\').submit()\">" + graphic.attributes.INV_PTPWU_PROJECT_CODE + "</a></dd>" +
-                          "<dt>Coordination</dt><dd><form name='statusres' id='statusres' target='_blank' method='post' " + 
-                           "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaCoordination4GCC.jsp'>" +
-                          "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
-                          "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPWU_WORK_ID + "' />" +  
-                          "</form><a href=\"#\" onclick=\"document.getElementById(\'statusres\').submit()\">Link to Status and Resolution</a></dd>":"") +  
-            "<dt></dt><dd></dd>" +
-            (graphic.attributes.INV_PTPDB_WORK_ID?"<dt>PTP Delivery Bundle</dt><dd>" +"<form name='delbundle' id='delbundle' target='_blank' method='post' " + 
-                           "action='https://insideto-secure.toronto.ca/wes/ptp/projecttracking/cpca/cpcaBasicInfo4GCC.jsp'>" +
-                          "<input type='hidden' id='skipMYPTP' name='skipMYPTP' value='1' />" +
-                          "<input type='hidden' id='ptpWorkId' name='ptpWorkId' value='" + graphic.attributes.INV_PTPDB_WORK_ID + "' />" + 
-                          "</form><a href=\"#\" onclick=\"document.getElementById(\'delbundle\').submit()\">"+ graphic.attributes.INV_PTPDB_PROJECT_CODE + "</a></dd>":"") +
-          "</dl>";
-        return content;
-      },
-
       onOpen: function(){
         var panel = this.getPanel();
         panel.position.width = 500;
         panel.setPosition(panel.position);
         panel.panelManager.normalizePanel(panel);
-        if ($("#map").attr("data-zoom") < 5) {
-          $(".btnSelectAll").button("option", "disabled", true);
-        } else {
+        if ($("#map").attr("data-zoom") > 12) {
           $(".btnSelectAll").button("option", "disabled", false);
+        } else {
+          $(".btnSelectAll").button("option", "disabled", true);
         }
         if ($('.btnToggleAll').children("span").text().indexOf("Collapse") >= 0) {
           $('.btnToggleAll').click();
         }
-        
         this.buildLayer("category");
       }
     });
