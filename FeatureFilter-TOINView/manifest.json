@@ -1,0 +1,23 @@
+{
+  "name": "Feature Filter",
+  "2D": true,
+  "3D": false,
+  "platform": "HTML",
+  "version": "2.3",
+  "wabVersion": "2.3",
+  "author": "Esri R&D Center Beijing",
+  "description": "This is the custom widget",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "inPanel": true,
+    "hasLocale": true,
+    "hasStyle": true,
+    "hasUIFile": true,
+    "hasSettingPage": true,
+    "hasSettingUIFile": true,
+    "hasSettingLocale": true,
+    "hasSettingStyle": true,
+    "IsController": false
+  }
+}

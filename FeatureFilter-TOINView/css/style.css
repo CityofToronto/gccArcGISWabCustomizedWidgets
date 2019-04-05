@@ -1,0 +1,135 @@
+/* -------------------- overwrite esri default style start ----------------------- */
+/* change color for zoom, home and location button */
+.jimu-widget-zoomslider .zoom, 
+.jimu-widget-homebutton .HomeButton .home, 
+.jimu-widget-mylocation .place-holder { background-color: #000;  }
+
+/* hide near me tool direction tab */
+.esriCTDirectionInfoPanel .esriCTItemlList { border-bottom: 1px solid #000 !important; }
+.esriCTDirectionInfoPanel .jimu-tab>.control { display: none !important; }
+
+/* bookmark widget style over write */
+.jimu-widget-bookmark .bookmark-list { display: flex; flex-direction: column; } 
+.jimu-widget-bookmark .jimu-img-node { overflow: visible !important; width: 100% !important; }
+.jimu-widget-bookmark .jimu-img-node .node-label { width: 100% !important; text-align: left !important; height: 1.8em !important; cursor: pointer;}
+.jimu-widget-bookmark .jimu-img-node .node-box { display: none }
+.jimu-widget-bookmark .list .jimu-img-node, .jimu-img-node .drag-masker, .jimu-widget-bookmark .list .jimu-img-node .dijitTextBox { height: 20px !important; overflow-y: hidden !important;}
+.mobile.jimu-widget-bookmark .jimu-img-node { height: 25px !important; }
+.mobile.jimu-widget-bookmark .jimu-img-node .dijitTextBoxDisabled, 
+.mobile.jimu-widget-bookmark .jimu-img-node .dijitTextBox .dijitInputField, 
+.jimu-widget-bookmark .list .jimu-img-node .dijitTextBoxDisabled, 
+.jimu-widget-bookmark .list .jimu-img-node .dijitTextBox .dijitInputField { width: calc(100% - 55px) !important;}
+.jimu-widget-bookmark .drawer-handle .separate-line { border-top: none !important;}
+
+/* measurement widget owerwrite */
+#tabs, .esriMeasurement { border: none; background-color: #f5f5f5; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);}
+.esriMeasurement { padding: 10px; }
+
+/* near me widget results list */
+.esriViewPopup table td:first-child {width: 85px;}
+.esriViewPopup table tr { height: 20px; }
+
+.jimu-widget-attributetable .ui-state-active.dgrid-row { background-color:  #005134 !important;} /* overwrite select widget - attribute comparison in attribute table */
+/* -------------------- overwrite esri default style end ----------------------- */
+
+
+/** fieldset, legend, checkbox and label styles **/
+fieldset { display: flex; margin-bottom: 15px; flex-direction: column; display: table; border:1px solid #005fa2; padding: 5px; }
+legend { /*margin-bottom: 20px; */ font-weight: 700; color: #005fa2; font-size: 16px;} 
+label.short { width: 52px; text-align: center; }
+
+/*fieldset.year-wrapper,
+fieldset.category, 
+fieldset.conflict  { display: table; border:1px solid #005fa2; padding: 5px; } */
+fieldset.year-wrapper { border: none; }
+fieldset.year-wrapper legend { color: #fff; background: #0288d1; width: 100%; padding: 1px 3px 6px 5px; cursor: pointer; border-radius: 3px; border: 1px solid #01579b;}
+fieldset.year-wrapper legend > span.whiteTriangle { margin: 4px 10px 0 5px; display: inline-block; background-image: url("images/ui-icons_ffffff_256x240.png"); background-position: -32px -14px; width: 16px; height: 16px;}
+fieldset.year-wrapper legend > span.whiteTriangle.close { background-position: -65px -14px; }
+fieldset.year-wrapper > div { border: 1px solid #01579b; padding: 5px; margin-top: -6px; }
+fieldset.year-wrapper > div > button { margin-bottom: 5px }
+/*.year-wrapper label.ui-checkboxradio-label { background-color: #fff; } */
+
+fieldset.category > button { margin-bottom: 5px; }
+.group-layer-row { display: flex; flex-direction: column; }
+.group-layer-heading { display: flex; flex-direction: row; }
+.group-layer-heading span.legend { /*top: -5px; position: relative; */ margin-top: 3px;}
+.group-layer-heading label.ui-checkboxradio-label { margin-top: 0; border: none;}
+.headingIcon { width: 16px; height: 16px; cursor: pointer; margin-left: 3px; margin-top: 8px; background-image: url("images/ui-icons_555555_256x240.png"); background-repeat: no-repeat; background-position: -32px -17px;}
+.headingIcon.close { background-position: -65px -16px; }
+.layer-row { display: flex; align-items: center; margin-left: 50px; }
+.layer-row > span { width: 45px; margin-top: 4px;}
+.layer-row > span > img { /*width: 80%; height: 80%; */}
+.group-layer-row > .group-layer-row { margin-left: 30px; }
+.group-layer-row > .group-layer-row .group-layer-heading span.legend { margin: 8px 8px 0 2px;}
+.ui-icon-indeterminate { background-position: -63px -128px; }
+
+.btnContainer { font-size: 1.5em; color: #005fa2; font-weight: 700; text-align: center; }
+.btnContainer button { padding: 5px 25px; background-color: #005fa2; color: #fff; margin: 5px 0 10px;}
+#btnApply:active { background: #0288d1 !important; border: 1px solid #01579b !important;}
+
+#conflict fieldset p { margin: 15px 10px; font-size: 1.1em;}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/** info window styles **/
+.esriPopupWrapper { max-height: 350px; }
+.esriPopup .titlePane { white-space: nowrap;}
+.esriPopupWrapper .contentPane,
+.esriPopupWrapper .actionsPane,  .esriMobileInfoView { background-color: #f5f5f5; overflow-y: scroll; }
+.esriMobileInfoView .coordination { padding: 10px;}
+.esriPopupWrapper .title { width: 70%; white-space: normal;}
+.esriPopupWrapper dl, .esriMobileInfoViewItem dl { display: flex; flex-flow: row; flex-wrap: wrap; }
+.esriPopupWrapper dt, .esriMobileInfoViewItem dt { font-weight: 700; flex: 0 0 33%; text-overflow: ellipsis; overflow: hidden;}
+.esriPopupWrapper dd, .esriMobileInfoViewItem dd { flex: 0 0 64%; margin-left: auto; text-align: left; text-overflow: ellipsis; overflow: hidden; }
+
+.esriPopupWrapper dt, .esriPopupWrapper dd, .esriPopupWrapper p, .esriPopupWrapper tr, 
+.esriMobileInfoViewItem dd, .esriMobileInfoViewItem dt, .esriMobileInfoView .esriViewPopup tr { font-size: 12px; margin-bottom: 4px; font-family: Arial, Helvetica, sans-serif;}
+.esriPopupWrapper th, .esriMobileInfoView .esriViewPopup th { display: none; }
+.esriPopupWrapper tr td:first-child, .esriMobileInfoView .esriViewPopup tr td:first-child { font-weight: 700; vertical-align: top; width: 120px;} 
+.infoTabs.ui-tabs div.ui-tabs-panel { padding: 8px 5px !important; }
+#infoWindowTabs-2 dt { flex: 0 0 55%; }
+#infoWindowTabs-2 dd { flex: 0 0 40%; }
+
+/* coordination popup */
+.esriPopupWrapper dl.coordination dt, .esriMobileInfoViewItem dl.coordination dt { flex: 0 0 21%; }
+.esriPopupWrapper dl.coordination dd, .esriMobileInfoViewItem dl.coordination dd { flex: 0 0 78%; }
+.esriPopupWrapper dl.coordination table { min-width: 500px; border-collapse: collapse;}
+.esriPopupWrapper dl.coordination th, .esriMobileInfoView dl.coordination th { display: table-cell; }
+.esriPopupWrapper dl.coordination tr:nth-child(even), .esriMobileInfoViewItem dl.coordination tr:nth-child(even) { background: #ccc; }
+.esriPopupWrapper dl.coordination td:first-child, .esriMobileInfoView dl.coordination td:first-child { vertical-align: middle; padding-left: 5px; width: 30px;}
+.esriPopupWrapper dl.coordination td:nth-child(2) { width: 50px;}
+.esriPopupWrapper dl.coordination dd.scrollable, .esriMobileInfoViewItem dl.coordination dd.scrollable { overflow: scroll;}
+/* end */
+
+
+/*.esriPopupWrapper tr td:last-child { width: 60%; }*/
+
+/** general **/
+.hidden { display: none !important; }
+
+/* overwrite jquery ui label default style */
+#tabs .ui-checkboxradio-label { text-align: left; margin: 1px 0; border: none !important; display: inline-flex;}
+#tabs .ui-checkboxradio-label > span.ui-icon { margin-right: 10px; margin-top: 1px; }
+#tabs .ui-checkboxradio-label:hover,
+#tabs .ui-button.ui-state-active:hover  { border: none; }
+
+#tabs .ui-state-active, 
+#tabs .ui-widget-content .ui-state-active, 
+#tabs .ui-widget-header .ui-state-active, 
+#tabs a.ui-button:active, 
+#tabs .ui-button:active, 
+#tabs .ui-button.ui-state-active:hover {background: #0288d1; border: 1px solid #01579b;}
+
+/*path { fill-opacity: 0.8; }
+#graphicsLayer2_layer path { fill-opacity: 0.5;}*/
+
+/** IE 11 only **/
+@media all and (-ms-high-contrast:none) {
+	fieldset { width: 100%; }
+	fieldset.current-year { margin-top: 15px; }
+	fieldset > legend { margin-top: -15px; background-color: #f5f5f5; } 
+	fieldset.year-wrapper > div { margin-top: -1px; } 
+}
