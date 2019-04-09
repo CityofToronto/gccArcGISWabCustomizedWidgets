@@ -28,6 +28,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $("div.btnContainer").addClass("hidden");
         }
 
+        if (!this.showSelectAllButton) {
+          $(".btnSelectAll").addClass("hidden");
+        }
+
         // generate layer list with checkboxes for all tabs
         this.createLayerGroup("tab1", '', config.groupLayer1, 0, legendUrl);
         this.createLayerGroup("tab2", '', config.groupLayer2, 0, legendUrl);
@@ -97,7 +101,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             }
           });
 
-          this.setDefaultVisibleLayer(this.mapOtherLayerInfo, $('.otherInfo').find("input"));
+          this.setDefaultVisibleLayer(this.mapOtherLayerInfo, $('.feature-group').find("input"));
 
           // disable / enable select all program buttons
           this.map.on("extent-change", function(ext){
@@ -230,7 +234,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           childCategories.prop('checked', false);
           groupHeadingLabel.removeClass('ui-checkboxradio-checked ui-state-active');
           groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-check ui-state-checked').addClass('ui-icon-blank');
-          
+
           if (!that.showApplyButton) {
             $('#btnApply').click();
           }
@@ -418,19 +422,20 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       },
 
       setDefaultVisibleLayer: function(layers, layerInputs) {
-        var visibleLayer;
+        var visibleLayer, layerName;
         $.each(layers, function(index, layer) {
           if (layer.visible) {
-            visibleLayer = layerInputs.filter(function(index) {
-              return $.trim($("label[for='" + layerInputs[index].id + "']").text()) == layer.name;
-            })
+            if (layer.name.indexOf("-") >= 0) {
+              layerName = layer.name.split("-")[1].trim().toLowerCase();
+            }
+            visibleLayer = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
+            if (visibleLayer && visibleLayer.length > 0) {
+              $(visibleLayer).prop("checked", true);
+              $("label[for='" + visibleLayer[0].id + "']").addClass("ui-checkboxradio-checked ui-state-active");
+              $("label[for='" + visibleLayer[0].id + "']").children('.ui-icon').addClass('ui-icon-check ui-state-checked');
+            }
           }
         });
-        if (visibleLayer && visibleLayer.length > 0) {
-          $(visibleLayer).prop("checked", true);
-          $("label[for='" + visibleLayer[0].id + "']").addClass("ui-checkboxradio-checked ui-state-active");
-          $("label[for='" + visibleLayer[0].id + "']").children('.ui-icon').addClass('ui-icon-check ui-state-checked');
-        }
       },
 
 
@@ -509,7 +514,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         if ($('.btnToggleAll').children("span").text().indexOf("Collapse") >= 0) {
           $('.btnToggleAll').click();
         }
-        this.buildLayer("category");
+        //this.buildLayer("category");
       }
     });
   });
