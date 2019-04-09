@@ -101,15 +101,18 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             }
           });
 
-          this.setDefaultVisibleLayer(this.mapOtherLayerInfo, $('.feature-group').find("input"));
 
           // disable / enable select all program buttons
-          this.map.on("extent-change", function(ext){
+          var that = this;
+          that.setDefaultVisibleLayer(that.mapOtherLayerInfo, $('.feature-group').find("input"));
+
+          that.map.on("extent-change", function(ext){
             if ($("#map").attr("data-zoom") > 12) {
               $(".btnSelectAll").button("option", "disabled", false);
             } else {
               $(".btnSelectAll").button("option", "disabled", true);
             }
+            that.disableInputOnLayerVisibleScale(that.mapOtherLayerInfo, $('.feature-group').find("input"));
           });
         }
 
@@ -120,7 +123,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $(this).closest('.group-layer-row').children('.group-layer-row').slideToggle("fast");
         });
 
-        var that = this;
         // group heading checkbox event
         $('#tabs fieldset.feature-group').on('change', '.layer-heading', function(){
           var childCategories = $(this).parent('.group-layer-heading').siblings('.layer-row, .group-layer-row');
@@ -260,6 +262,21 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         
       },
 
+      // enable or disable input checkbox by layer visibility at current map scale
+      disableInputOnLayerVisibleScale: function(layers, layerInputs) {
+        var layerName, matchingInput, inputStatus;
+        $.each(layers, function(index, layer) {
+          layerName = layer.name;
+          inputStatus = layer.visibleAtMapScale?"enable":"disable";
+          if (layerName.indexOf("-") >= 0) {
+            layerName = layer.name.split("-")[1].trim().toLowerCase();
+          }
+          matchingInput = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
+          if (matchingInput && matchingInput.length > 0) {
+            $(matchingInput).checkboxradio(inputStatus);
+          }
+        })
+      },
       // build category groups
       createLayerGroup: function(tab, toDomNode, groupInfo, level, legendUrl) {
         var that = this, counter = 0, groupName, html, groupHeadingValue;
@@ -425,7 +442,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         var visibleLayer, layerName;
         $.each(layers, function(index, layer) {
           if (layer.visible) {
-            if (layer.name.indexOf("-") >= 0) {
+            layerName = layer.name;
+            if (layerName.indexOf("-") >= 0) {
               layerName = layer.name.split("-")[1].trim().toLowerCase();
             }
             visibleLayer = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
@@ -515,6 +533,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $('.btnToggleAll').click();
         }
         //this.buildLayer("category");
+        this.disableInputOnLayerVisibleScale(this.mapOtherLayerInfo, $('.feature-group').find("input"));
       }
     });
   });
