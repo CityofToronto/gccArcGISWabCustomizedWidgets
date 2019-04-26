@@ -82,7 +82,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           infoTemplate.setContent(this.getTextContent);
 
           for (var i = 0; i < myLayers.length; i++) {
-            if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf("program") >= 0) {
+            if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf(config.filterLayerTitle) >= 0) {
               myLayers[i].layer.infoTemplate = infoTemplate;
               this.mapProgramLayerInfo.push(myLayers[i].layer);
             } else if (myLayers[i].title.toLowerCase().indexOf("wards") < 0 && myLayers[i].title.toLowerCase().indexOf("coordination") >= 0) {
@@ -153,9 +153,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             }
           }
 
-          if (!that.showApplyButton) {
-            $('#btnApply').click();
-          }
+          if (!that.showApplyButton) that.toggleLayers(this);
+
         });
 
         // category checkbox event
@@ -179,9 +178,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             }
           }
 
-          if (!that.showApplyButton) {
-            $('#btnApply').click();
-          }
+          if (!that.showApplyButton) that.toggleLayers(this);
+
         });
 
         // select/unselect all current/past year event
@@ -225,9 +223,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           groupHeadingLabel.addClass('ui-checkboxradio-checked ui-state-active');
           groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-blank').addClass('ui-icon-check ui-state-checked');
 
-          if (!that.showApplyButton) {
-            $('#btnApply').click();
-          }
+          if (!that.showApplyButton) that.toggleLayers(this);
+
         });
 
         $('.btnUnselectAll').click(function(){
@@ -237,9 +234,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           groupHeadingLabel.removeClass('ui-checkboxradio-checked ui-state-active');
           groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-check ui-state-checked').addClass('ui-icon-blank');
 
-          if (!that.showApplyButton) {
-            $('#btnApply').click();
-          }
+          if (!that.showApplyButton) that.toggleLayers(this);
           
         });
 
@@ -249,17 +244,21 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           $(this).find(".whiteTriangle").toggleClass("close");
         });
 
-        $("#btnApply").click(function() {
-          var activeTabIndex = $("#tabs").tabs("option", "active");
-          var activeTab = $("#tabs li").eq(activeTabIndex).attr("data-attr");
-
-          if (activeTab != "filteredLayers") {
-            that.toggleOtherInfoLayerVisibility();
-          } else { 
-            that.buildLayer(activeTab);
-          }
-        });
+        $("#btnApply").click(that.toggleLayers());
         
+      },
+
+      toggleLayers: function(target) {
+        var targetInput;
+        if (target) targetInput = $(target).attr("data-attr"); 
+        var activeTabIndex = $("#tabs").tabs("option", "active");
+        var activeTab = $("#tabs li").eq(activeTabIndex).attr("data-attr");
+
+        if (activeTab != "filteredLayers" && targetInput !="filteredLayers") {
+          this.toggleOtherInfoLayerVisibility();
+        } else { 
+          this.buildLayer(activeTab);
+        }
       },
 
       // enable or disable input checkbox by layer visibility at current map scale
@@ -269,9 +268,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           layerName = layer.name;
           inputStatus = layer.visibleAtMapScale?"enable":"disable";
           if (layerName.indexOf("-") >= 0) {
-            layerName = layer.name.split("-")[1].trim().toLowerCase();
+            layerName = layer.name.split("-")[1].trim();
           }
-          matchingInput = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
+          matchingInput = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName.toLowerCase());
           if (matchingInput && matchingInput.length > 0) {
             $(matchingInput).checkboxradio(inputStatus);
           }
@@ -315,7 +314,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       addLayerNode: function(tab, layerInfo, layerIndex, level, toDomNode, legendUrl) {
         var html = "<div class='layer-row'>" + 
                       (layerInfo.legend&&layerInfo.legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + layerInfo.legend + "' alt='" + layerInfo.label + " legend' /></span>":"") +
-                      "<label for='checkbox-" + layerInfo.id  + "'>" + layerInfo.label + "</label><input type='checkbox' class='layer-category' value='" + layerInfo.id + "' name='checkbox-" +  layerInfo.id + "' id='checkbox-" +  layerInfo.id + "'>" + 
+                      "<label for='checkbox-" + layerInfo.id  + "'>" + layerInfo.label + "</label><input type='checkbox' class='layer-category'" + (layerInfo.filterById?" data-attr='filteredLayers'":"") + " value='" + layerInfo.id + "' name='checkbox-" +  layerInfo.id + "' id='checkbox-" +  layerInfo.id + "'>" + 
                     "</div>";
         if (level == 0) {
           $('#' + tab + ' fieldset > .group-layer-row:eq(' + layerIndex + ')').append(html);

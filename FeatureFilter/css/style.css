@@ -39,7 +39,7 @@ fieldset.year-wrapper > div > button { margin-bottom: 5px }
 fieldset.category > button { margin-bottom: 5px; }
 .group-layer-row { display: flex; flex-direction: column; }
 .group-layer-heading { display: flex; flex-direction: row; }
-.group-layer-heading span.legend { /*top: -5px; position: relative; */ margin-top: 7px;}
+.group-layer-heading span.legend { /*top: -5px; position: relative; */ margin-top: 7px; min-width: 20px; text-align: center;}
 span.legend > img { max-height: 16px;}
 .group-layer-heading label.ui-checkboxradio-label { margin-top: 0; border: none;}
 .headingIcon { width: 16px; height: 16px; cursor: pointer; margin-left: 3px; margin-top: 8px; background-image: url("images/ui-icons_555555_256x240.png"); background-repeat: no-repeat; background-position: -32px -17px;}

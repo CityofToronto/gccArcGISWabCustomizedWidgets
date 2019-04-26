@@ -89,27 +89,43 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
     },
 
     findFeatures: function(data) {
-      var centrePoint;
+      var graphic, thisExtent;
       if (data.length > 0) {
+
         if (data[0].geometry.type == "point") {           
-          centrePoint = new Point(data[0].geometry);
+          var xmin = data[0].geometry.x; 
+          var xmax = data[0].geometry.x; 
+          var ymax = data[0].geometry.y; 
+          var ymin = data[0].geometry.y; 
+
+          newExtent = new Extent(xmin, ymin, xmax, ymax, data[0].geometry.spatialReference); 
+
+          for (i = 1; i < data.length; i++) { 
+            graphic = data[i]; 
+            var xmini = data[i].geometry.x; 
+            var xmaxi = data[i].geometry.x; 
+            var ymaxi = data[i].geometry.y; 
+            var ymini = data[i].geometry.y; 
+
+            thisExtent = new Extent(xmini, ymini, xmaxi, ymaxi, data[0].geometry.spatialReference); 
+          } 
         } 
 
-        if (data[0].geometry.type == "polyline") {
-          var mid = Math.round(data[0].geometry.paths[0].length/2);
-          centrePoint = new Point({"spatialReference": data[0].geometry.spatialReference, "x": data[0].geometry.paths[0][mid][0], "y": data[0].geometry.paths[0][mid][1]});
+        if (data[0].geometry.type == "polyline" || data[0].geometry.type == "polygon") {
+          newExtent = new Extent(data[0].geometry.getExtent()) 
+          for (i = 0; i < data.length; i++) { 
+            graphic = data[i]; 
+            thisExtent = graphic.geometry.getExtent();  
+          } 
         }
 
-        if (data[0].geometry.type == "polygon") {
-          var mid = Math.round(data[0].geometry.rings[0].length/2);
-          centrePoint = new Point({"spatialReference": data[0].geometry.spatialReference, "x": data[0].geometry.rings[0][mid][0], "y": data[0].geometry.rings[0][mid][1]});
-        }
-
-        map.centerAndZoom(centrePoint, 20);
+        // making a union of extent or previous feature and current feature. 
+        newExtent = newExtent.union(thisExtent); 
+        map.setExtent(newExtent); 
       } 
       if (data.length > urlValues.length) {
-        $("#dialog p").text("Non-unique features are found.")
-        $("#dialog").dialog("open");
+        //$("#dialog p").text("Non-unique features are found.")
+        //$("#dialog").dialog("open");
       } else if (data.length < urlValues.length) {
         $("#dialog p").text("One or more features do not exist.")
         $("#dialog").dialog("open");
