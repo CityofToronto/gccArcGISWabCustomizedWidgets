@@ -291,7 +291,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
                         "<div class='group-layer-heading'>" + 
                           "<span class='" + (groupInfo[grouplayer].layers?"headingIcon":"headingIconPlaceolder") + "'></span>" + 
                           (groupInfo[grouplayer].legend&&groupInfo[grouplayer].legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
-                          "<label for='" + groupName  + "'>" + grouplayer + "</label><input type='checkbox' class='layer-heading' value='" + groupHeadingValue + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
+                          "<label for='" + groupName  + "'>" + grouplayer + "</label><input type='checkbox' class='layer-heading'" + (groupInfo[grouplayer].filterById?" data-attr='filteredLayers'":"") + " value='" + groupHeadingValue + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
                         "</div>" + 
                       "</div>";
           if (level == 0) {
@@ -441,9 +441,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         var visibleLayer, layerName;
         $.each(layers, function(index, layer) {
           if (layer.visible) {
-            layerName = layer.name;
+            layerName = layer.name.toLowerCase();
             if (layerName.indexOf("-") >= 0) {
-              layerName = layer.name.split("-")[1].trim().toLowerCase();
+              layerName = layerName.split("-")[1].trim();
             }
             visibleLayer = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
             if (visibleLayer && visibleLayer.length > 0) {

@@ -36,9 +36,9 @@ fieldset.year-wrapper > div { border: 1px solid #01579b; padding: 5px; margin-to
 fieldset.year-wrapper > div > button { margin-bottom: 5px }
 /*.year-wrapper label.ui-checkboxradio-label { background-color: #fff; } */
 
-fieldset.category > button { margin-bottom: 5px; }
+fieldset > button { margin-bottom: 5px; }
 .group-layer-row { display: flex; flex-direction: column; }
-.group-layer-heading { display: flex; flex-direction: row; }
+.group-layer-heading { display: flex; flex-direction: row; align-items: center;}
 .group-layer-heading span.legend { /*top: -5px; position: relative; */ margin-top: 7px; min-width: 20px; text-align: center;}
 span.legend > img { max-height: 16px;}
 .group-layer-heading label.ui-checkboxradio-label { margin-top: 0; border: none;}
@@ -87,7 +87,7 @@ fieldset.feature-group .headingIconPlaceolder { width: 19px; height: 30px; }
 .hidden { display: none !important; }
 
 /* overwrite jquery ui label default style */
-#tabs .ui-checkboxradio-label { text-align: left; margin: 1px 0; border: none !important; display: inline-flex;}
+#tabs .ui-checkboxradio-label { text-align: left; margin: 1px 0; border: none !important; display: inline-flex; align-items: center;}
 #tabs .ui-checkboxradio-label > span.ui-icon { margin-right: 10px; margin-top: 1px; }
 #tabs .ui-checkboxradio-label:hover,
 #tabs .ui-button.ui-state-active:hover  { border: none; }
