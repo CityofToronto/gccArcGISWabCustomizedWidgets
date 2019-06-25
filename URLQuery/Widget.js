@@ -27,7 +27,10 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
       if (this.map.itemId) {
         map = this.map;
         mapLayers = ArcgisUtils.getLayerList(map);
-        var layerList = this.config.layerName.map(v => v.toLowerCase()), layers = [];
+        var /* layerList = this.config.layerName.map(v => v.toLowerCase()), */ layers = [];
+        var layerList = this.config.layerName.map(function(v) {
+          return v.toLowerCase();
+        })
         for (var i = 0; i < mapLayers.length; i++) {
           var title = mapLayers[i].title.toLowerCase();
           if ($.inArray(title, layerList) >=0) {
@@ -42,7 +45,10 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
       urlValues = this.getURLParams('value')?this.getURLParams('value').split(","):this.getURLParams('value');
 
       if (layerName && paramValue && fieldName) {
-        queryLayer = layers.filter(v => v.name == layerName.toLowerCase())[0];
+        queryLayer = layers.filter(function(v) {
+          return v.name == layerName.toLowerCase()
+        })[0]
+        //queryLayer = layers.filter(v => v.name == layerName.toLowerCase())[0];
       } 
       //var queryLayer = layers.filter(function(item){return item.name == layerName})[0];
 
@@ -89,7 +95,7 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
     },
 
     findFeatures: function(data) {
-      var graphic, thisExtent;
+      var thisExtent;
       if (data.length > 0) {
 
         if (data[0].geometry.type == "point") {           
@@ -101,26 +107,27 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
           newExtent = new Extent(xmin, ymin, xmax, ymax, data[0].geometry.spatialReference); 
 
           for (i = 1; i < data.length; i++) { 
-            graphic = data[i]; 
             var xmini = data[i].geometry.x; 
             var xmaxi = data[i].geometry.x; 
             var ymaxi = data[i].geometry.y; 
             var ymini = data[i].geometry.y; 
 
-            thisExtent = new Extent(xmini, ymini, xmaxi, ymaxi, data[0].geometry.spatialReference); 
+            thisExtent = new Extent(xmini, ymini, xmaxi, ymaxi, data[i].geometry.spatialReference); 
+            newExtent = newExtent.union(thisExtent); 
           } 
+          newExtent = new Extent(newExtent.xmin-10000, newExtent.ymin-10000, newExtent.xmax+10000, newExtent.ymax+10000, newExtent.spatialReference)
         } 
 
         if (data[0].geometry.type == "polyline" || data[0].geometry.type == "polygon") {
           newExtent = new Extent(data[0].geometry.getExtent()) 
-          for (i = 0; i < data.length; i++) { 
-            graphic = data[i]; 
-            thisExtent = graphic.geometry.getExtent();  
+          for (i = 1; i < data.length; i++) { 
+            thisExtent = data[i].geometry.getExtent(); 
+            newExtent = newExtent.union(thisExtent) 
           } 
+          newExtent = new Extent(newExtent.xmin-900, newExtent.ymin-900, newExtent.xmax+900, newExtent.ymax+900, newExtent.spatialReference)
         }
 
-        // making a union of extent or previous feature and current feature. 
-        newExtent = newExtent.union(thisExtent); 
+        //newExtent = newExtent.union(thisExtent); 
         map.setExtent(newExtent); 
       } 
       if (data.length > urlValues.length) {
