@@ -115,7 +115,7 @@ function(declare, BaseWidget, ArcgisUtils, Extent, Query, FeatureLayer, InfoTemp
             thisExtent = new Extent(xmini, ymini, xmaxi, ymaxi, data[i].geometry.spatialReference); 
             newExtent = newExtent.union(thisExtent); 
           } 
-          newExtent = new Extent(newExtent.xmin-10000, newExtent.ymin-10000, newExtent.xmax+10000, newExtent.ymax+10000, newExtent.spatialReference)
+          newExtent = new Extent(newExtent.xmin-5000, newExtent.ymin-5000, newExtent.xmax+5000, newExtent.ymax+5000, newExtent.spatialReference)
         } 
 
         if (data[0].geometry.type == "polyline" || data[0].geometry.type == "polygon") {
