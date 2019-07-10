@@ -126,34 +126,32 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         // group heading checkbox event
         $('#tabs fieldset.feature-group').on('change', '.layer-heading', function(){
           that.setParentChildrenInputVisual(this);
-          if (!that.showApplyButton) that.toggleLayers(this);
+          if (!that.showApplyButton) that.toggleLayers();
         });
 
         // category checkbox event
         $('#tabs fieldset.feature-group').on('change', '.layer-category', function(){
           var groupHeadings = $(this).parents('.group-layer-row');
-          var noOfCheckedCategory, noOfAllCategories, groupHeadingLabel
+          var noOfCheckedCategory, noOfAllCategories;
           for (var i = 0; i < groupHeadings.length; i++) {
             noOfCheckedCategory = groupHeadings.eq(i).find('.layer-category:checked').length;
             noOfAllCategories = groupHeadings.eq(i).find('.layer-category').length;
-            groupHeadingLabel = groupHeadings.eq(i).children('.group-layer-heading').find('label');
             groupHeading = groupHeadings.eq(i).children('.group-layer-heading').find('input');
             if (noOfAllCategories == noOfCheckedCategory) {
               groupHeading.prop("checked", this.checked);
               groupHeading.checkboxradio("refresh");
             } else {
               if (noOfCheckedCategory == 0) {
-                groupHeading.prop("checked", false);  
+                groupHeading.prop("indetermined", false).prop("checked", false);  
                 groupHeading.checkboxradio("refresh");           
               } else {
                 groupHeading.prop("checked", false).prop("indetermined", true);
-                groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked').addClass('ui-icon-indeterminate');
+                groupHeadings.eq(i).children('.group-layer-heading').find('label').children('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked').addClass('ui-icon-indeterminate');
               }
             }
           }
 
-
-          if (!that.showApplyButton) that.toggleLayers(this);
+          if (!that.showApplyButton) that.toggleLayers()
 
         });
 
@@ -180,7 +178,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             text = "Collapse"; 
             heading.children('.layer-row').slideDown("fast");
             heading.children('.group-layer-row').slideDown("fast");
-           heading.find('.group-layer-heading .headingIcon').removeClass("close");
+            heading.find('.group-layer-heading .headingIcon').removeClass("close");
           } else {
             text = "Expand";
             heading.children('.layer-row').slideUp("fast");
@@ -198,7 +196,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           groupHeadingLabel.addClass('ui-checkboxradio-checked ui-state-active');
           groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-blank').addClass('ui-icon-check ui-state-checked');
 
-          if (!that.showApplyButton) that.toggleLayers(this);
+          if (!that.showApplyButton) that.toggleLayers();
 
         });
 
@@ -209,7 +207,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
           groupHeadingLabel.removeClass('ui-checkboxradio-checked ui-state-active');
           groupHeadingLabel.children('.ui-icon').removeClass('ui-icon-check ui-state-checked').addClass('ui-icon-blank');
 
-          if (!that.showApplyButton) that.toggleLayers(this);
+          if (!that.showApplyButton) that.toggleLayers();
           
         });
 
@@ -223,29 +221,33 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         
       },
 
-      toggleLayers: function(target) {
-        var targetInput;
-        if (target) targetInput = $(target).attr("data-attr"); 
-        var activeTabIndex = $("#tabs").tabs("option", "active");
-        var activeTab = $("#tabs li").eq(activeTabIndex).attr("data-attr");
-
-        if (activeTab != "filteredLayers" && targetInput !="filteredLayers") {
-          this.toggleOtherInfoLayerVisibility();
-        } else { 
-          this.buildLayer(activeTab);
+      toggleLayers: function() {
+        // builder layerDef for current tab
+        layerDef = this.buildCategoryFilter();
+        mapLayerInfo = this.mapProgramLayerInfo;
+        for (var i = 0; i < mapLayerInfo.length; i++) {
+            if (layerDef) {
+              mapLayerInfo[i].setDefinitionExpression(layerDef);
+              if (!mapLayerInfo[i].visible) mapLayerInfo[i].setVisibility(true);
+            } else {
+              mapLayerInfo[i].setVisibility(false);
+            }
         }
+        // set visibility based on checkbox.checked
+        this.toggleOtherInfoLayerVisibility(this.getOtherDef());
       },
 
       // enable or disable input checkbox by layer visibility at current map scale
       disableInputOnLayerVisibleScale: function(layers, layerInputs) {
         var layerName, matchingInput, inputStatus;
         $.each(layers, function(index, layer) {
-          layerName = layer.name;
+          layerName = layer.name.toLowerCase();
           inputStatus = layer.visibleAtMapScale?"enable":"disable";
           if (layerName.indexOf("-") >= 0) {
             layerName = layer.name.split("-")[1].trim();
           }
-          matchingInput = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName.toLowerCase());
+          //matchingInput = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName.toLowerCase());
+          matchingInput = layerInputs.filter(function(i) { return layerInputs[i].value.toLowerCase() == layerName });
           if (matchingInput && matchingInput.length > 0) {
             $(matchingInput).checkboxradio(inputStatus);
           }
@@ -401,11 +403,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         return tt;
       },
 
-      toggleOtherInfoLayerVisibility: function() {
+      toggleOtherInfoLayerVisibility: function(qd) {
         var checkedInputs = $("#tabs fieldset.feature-group").eq($("#tabs").tabs("option", "active")).find("input");
         $.map(this.mapOtherLayerInfo, function(layer, i) {
+          //console.log(checkedInputs.filter((i, c) => $.trim(layer.name.toLowerCase()).indexOf($.trim(c.value.toLowerCase())) >= 0));
           $.each(checkedInputs, function(index, checkbox){
             if ($.trim(layer.name.toLowerCase()).indexOf($.trim(checkbox.value.toLowerCase())) >= 0) {
+              //if (layerDef != '' && $(checkbox).siblings(".showDatePicker").length == 1) layer.setDefinitionExpression(layerDef);
+              //var q = qd.filter(l => l.layerId == layer.name);
+              var q = qd.filter(function(l) { return l.layerId == layer.name })
+              if (q.length == 1) layer.setDefinitionExpression(q[0].query);
               layer.setVisibility(checkbox.checked);
             } 
           })
@@ -414,16 +421,19 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       setDefaultVisibleLayer: function(layers, layerInputs) {
         var visibleLayer, layerName;
+        var that = this;
         $.each(layers, function(index, layer) {
           if (layer.visible) {
             layerName = layer.name.toLowerCase();
             if (layerName.indexOf("-") >= 0) {
               layerName = layerName.split("-")[1].trim();
             }
-            visibleLayer = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
+            //visibleLayer = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName);
+            visibleLayer = layerInputs.filter(function(i) { return layerInputs[i].value.toLowerCase() == layerName });
             if (visibleLayer && visibleLayer.length > 0) {
               $(visibleLayer).prop("checked", true);
               $(visibleLayer).checkboxradio("refresh");
+              //$(visibleLayer).parent('.group-layer-heading').siblings('.layer-row, .group-layer-row').find("input").prop("checked", true).checkboxradio("refresh");
               that.setParentChildrenInputVisual(visibleLayer[0]);
             }
           }
@@ -433,17 +443,23 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       setParentChildrenInputVisual: function(target) {
         childCategories = $(target).parent('.group-layer-heading').siblings('.layer-row, .group-layer-row').find('input').prop('checked', target.checked).checkboxradio("refresh");
         var parentProgramHeading = $(target).parent('.group-layer-heading').parent('.group-layer-row').siblings('.group-layer-heading');
+        var parentProgram = $(target).parent('.group-layer-heading').parent('.group-layer-row').siblings('.group-layer-heading').find("input");
         if (parentProgramHeading) {
-          var parentProgram = parentProgramHeading.parent(".group-layer-row");
-          var noOfSubPrograms = parentProgram.find(".layer-category").length;
-          var noOfCheckedSubPrograms = parentProgram.find(".layer-category:checked").length;
+          var subProgram = parentProgramHeading.parent(".group-layer-row");
+          var noOfSubPrograms = subProgram.find(".layer-category").length;
+          var noOfCheckedSubPrograms = subProgram.find(".layer-category:checked").length;
           parentProgramHeading.find('label').addClass("ui-checkboxradio-checked ui-state-active");
           if (noOfSubPrograms == noOfCheckedSubPrograms) {
-            parentProgramHeading.find('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked ui-icon-indeterminate').addClass('ui-icon-check ui-state-checked');
+            parentProgram.prop("checked", target.checked);
+            parentProgram.checkboxradio("refresh");
+            //parentProgramHeading.find('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked ui-icon-indeterminate').addClass('ui-icon-check ui-state-checked');
           } else {
             if (noOfCheckedSubPrograms == 0) {
-              parentProgramHeading.find('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked ui-icon-indeterminate').addClass('ui-icon-blank');
+              parentProgram.prop("indetermined", false).prop("checked", false);
+              parentProgram.checkboxradio("refresh");
+              //parentProgramHeading.find('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked ui-icon-indeterminate').addClass('ui-icon-blank');
             } else {
+              parentProgram.prop("checked", false).prop("indetermined", true);
               parentProgramHeading.find('.ui-icon').removeClass('ui-icon-blank ui-icon-check ui-state-checked').addClass("ui-icon-indeterminate");
             }
           }
