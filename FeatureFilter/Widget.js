@@ -241,10 +241,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       disableInputOnLayerVisibleScale: function(layers, layerInputs) {
         var layerName, matchingInput, inputStatus;
         $.each(layers, function(index, layer) {
-          layerName = layer.name.toLowerCase();
+          layerName = layer.name || layer.arcgisProps.title;
           inputStatus = layer.visibleAtMapScale?"enable":"disable";
           if (layerName.indexOf("-") >= 0) {
-            layerName = layer.name.split("-")[1].trim();
+            layerName = layerName.toLowerCase().split("-")[1].trim();
           }
           //matchingInput = layerInputs.filter(i => layerInputs[i].value.toLowerCase() == layerName.toLowerCase());
           matchingInput = layerInputs.filter(function(i) { return layerInputs[i].value.toLowerCase() == layerName });
@@ -408,10 +408,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         $.map(this.mapOtherLayerInfo, function(layer, i) {
           //console.log(checkedInputs.filter((i, c) => $.trim(layer.name.toLowerCase()).indexOf($.trim(c.value.toLowerCase())) >= 0));
           $.each(checkedInputs, function(index, checkbox){
-            if ($.trim(layer.name.toLowerCase()).indexOf($.trim(checkbox.value.toLowerCase())) >= 0) {
+            var layerName = layer.name || layer.arcgisProps.title;
+            if ($.trim(layerName.toLowerCase()).indexOf($.trim(checkbox.value.toLowerCase())) >= 0) {
               //if (layerDef != '' && $(checkbox).siblings(".showDatePicker").length == 1) layer.setDefinitionExpression(layerDef);
               //var q = qd.filter(l => l.layerId == layer.name);
-              var q = qd.filter(function(l) { return l.layerId == layer.name })
+              var q = qd.filter(function(l) { return l.layerId == layerName })
               if (q.length == 1) layer.setDefinitionExpression(q[0].query);
               layer.setVisibility(checkbox.checked);
             } 
@@ -424,7 +425,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         var that = this;
         $.each(layers, function(index, layer) {
           if (layer.visible) {
-            layerName = layer.name.toLowerCase();
+            layerName = layer.name || layer.arcgisProps.title;
+            layerName = layerName.toLowerCase()
             if (layerName.indexOf("-") >= 0) {
               layerName = layerName.split("-")[1].trim();
             }
