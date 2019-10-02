@@ -221,6 +221,20 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
         
       },
 
+      getOtherDef: function() {   
+        var checkboxes = $(".showDatePicker").siblings("input"), layerDef=[];   
+        $.each(checkboxes, function(index, checkbox) {    
+          if (checkbox.id == "Road_Restriction") {    
+            layerDef.push({"layerId": checkbox.value, "query":"NOT ((TO_CHAR(START_DATE,'YYYY-MM-DD') > '" + $("#Road_Restriction-to").val() + "' OR TO_CHAR(END_DATE,'YYYY-MM-DD') < '" + $("#Road_Restriction-from").val() +"'))"});    
+          }   
+          if (checkbox.id == "Utlity_Cut_Permit") {   
+            layerDef.push({"layerId":checkbox.value, "query":"TO_CHAR(ISSUED_DATE,'YYYY-MM-DD') BETWEEN '" + $("#Utlity_Cut_Permit-from").val() + "' AND '" + $("#Utlity_Cut_Permit-to").val() + "'"});   
+          }   
+        });   
+        //console.log(layerDef);    
+        return layerDef;    
+      },
+
       toggleLayers: function() {
         // builder layerDef for current tab
         layerDef = this.buildCategoryFilter();
@@ -256,6 +270,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
       // build category groups
       createLayerGroup: function(tab, toDomNode, groupInfo, level, legendUrl) {
         var that = this, counter = 0, groupName, html, groupHeadingValue;
+        var today = new Date(), d = new Date();   
+        var from = new Date(d.setMonth(d.getMonth() - 6));
         for (var grouplayer in groupInfo) {
           counter ++;
           groupName = grouplayer.replace(/[^a-zA-Z ]/g, "").split(' ').join('_');
@@ -265,12 +281,15 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
             groupHeadingValue = groupInfo[grouplayer].id;
           }
           html = "<div class='group-layer-row" + (groupInfo[grouplayer].class?" " + groupInfo[grouplayer].class:"") + "'>" +
-                        "<div class='group-layer-heading'>" + 
-                          "<span class='" + (groupInfo[grouplayer].layers?"headingIcon":"headingIconPlaceolder") + "'></span>" + 
-                          (groupInfo[grouplayer].legend&&groupInfo[grouplayer].legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
-                          "<label for='" + groupName  + "'>" + grouplayer + "</label><input type='checkbox' class='layer-heading'" + (groupInfo[grouplayer].filterById?" data-attr='filteredLayers'":"") + " value='" + groupHeadingValue + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
-                        "</div>" + 
-                      "</div>";
+                    "<div class='group-layer-heading'>" + 
+                      "<span class='" + (groupInfo[grouplayer].layers?"headingIcon":"headingIconPlaceolder") + "'></span>" + 
+                      (groupInfo[grouplayer].legend&&groupInfo[grouplayer].legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + groupInfo[grouplayer].legend + "' alt='" + groupName + " legend' /></span>":"") +
+                      "<label for='" + groupName  + "'>" + grouplayer + "</label>" + 
+                      "<input type='checkbox' class='layer-heading'" + (groupInfo[grouplayer].filterById?" data-attr='filteredLayers'":"") + " value='" + groupHeadingValue + "' name='" +  groupName + "' id='" +  groupName + "'>" + 
+                      (groupInfo[grouplayer].showDatePicker?"<a href='' class='showDatePicker'>Select Date Range</a>":"") + 
+                    "</div>" + 
+                    (groupInfo[grouplayer].showDatePicker?"<div class='datePickerPanel'><label for='" + groupName + "-from'>From: </label><input type='date' id='" + groupName + "-from' value='" + that.formatDate(from) + "'><label for='" + groupName + "-to'>To: </label><input type='date' id='" + groupName + "-to' value='" + that.formatDate(today) + "'></div>":"") +
+                  "</div>";
           if (level == 0) {
             //$('fieldset.' + propertyType).append(html);
             $('#' + tab + ' fieldset.feature-group').append(html);
@@ -290,8 +309,10 @@ define(['dojo/_base/declare', 'jimu/BaseWidget',
 
       addLayerNode: function(tab, layerInfo, layerIndex, level, toDomNode, legendUrl) {
         var html = "<div class='layer-row'>" + 
-                      (layerInfo.legend&&layerInfo.legend.indexOf(".png")>0?"<span class='legend'><img src='" + legendUrl + layerInfo.legend + "' alt='" + layerInfo.label + " legend' /></span>":"") +
-                      "<label for='checkbox-" + layerInfo.id  + "'>" + layerInfo.label + "</label><input type='checkbox' class='layer-category'" + (layerInfo.filterById?" data-attr='filteredLayers'":"") + " value='" + layerInfo.id + "' name='checkbox-" +  layerInfo.id + "' id='checkbox-" +  layerInfo.id + "'>" + 
+                      (layerInfo.legend&&layerInfo.legend.indexOf(".png")>0?"<span class='legend' id='legend_" + layerInfo.id + "'><img src='" + legendUrl + layerInfo.legend + "' alt='" + layerInfo.label + " legend' /></span>":"") +
+                      "<label for='checkbox-" + layerInfo.id  + "'" + (layerInfo.no_control?" class='marginLF20'":"") + ">" + layerInfo.label + "</label>" + 
+                      (layerInfo.no_control?"":"<input type='checkbox' class='layer-category'" + (layerInfo.filterById?" data-attr='filteredLayers'":"") + " value='" + layerInfo.id + "' name='checkbox-" +  layerInfo.id + "' id='checkbox-" +  layerInfo.id + "'>" + 
+                      (layerInfo.showDatePicker?"<a href='showDatePicker' class='showDatePicker'>Select Date Range</a>":"") +
                     "</div>";
         if (level == 0) {
           $('#' + tab + ' fieldset > .group-layer-row:eq(' + layerIndex + ')').append(html);
