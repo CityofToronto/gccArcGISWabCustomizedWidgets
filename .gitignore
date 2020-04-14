@@ -102,3 +102,9 @@ ZoomSlider/
 # ignore libraries
 ######################
 jquery-ui.css
+
+# ignore language files
+######################
+*/setting
+*/nls
+**/images
